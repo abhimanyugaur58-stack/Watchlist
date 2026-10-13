@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>वॉच-लिस्ट</title>
+<style>html, body { margin: 0; height: 100%; background: #121419; }</style>
+</head>
+<body>
+<script>
+// Starter page of the Android app.
+// Runs the newest app page this device has downloaded from GitHub (kept in localStorage by app.html),
+// otherwise the copy bundled in the APK (app.html). A downloaded page that never reached its first
+// screen is thrown away on the next start, so a bad update can't lock the app.
+(function () {
+  var SHELL = 3;     // version of this Android shell; app pages can ask for a newer one via "minShell"
+  var BUNDLED = 30;  // BUILD of the bundled app.html (tools/build.sh checks this)
+  window.WL_SHELL = SHELL;
+  var code = null;
+  try {
+    var v = parseInt(localStorage.getItem("wl-code-v") || "0", 10) || 0;
+    if (v > BUNDLED) {
+      if (localStorage.getItem("wl-boot") === String(v)) {
+        localStorage.setItem("wl-bad-v", String(v));
+        localStorage.removeItem("wl-code");
+        localStorage.removeItem("wl-code-v");
+        localStorage.removeItem("wl-boot");
+      } else {
+        code = localStorage.getItem("wl-code");
+        if (code) localStorage.setItem("wl-boot", String(v));
+      }
+    } else if (v) {
+      // The APK now carries something at least as new as the download.
+      localStorage.removeItem("wl-code");
+      localStorage.removeItem("wl-code-v");
+    }
+  } catch (e) { code = null; }
+  if (code) {
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        try { history.replaceState(null, "", "index.html?shell=" + SHELL); } catch (e) {}
+        document.open();
+        document.write(code);
+        document.close();
+      }, 0);
+    });
+  } else {
+    location.replace("app.html?shell=" + SHELL);
+  }
+})();
+</script>
+</body>
+</html>

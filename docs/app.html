@@ -1,0 +1,1175 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<!-- WATCHLIST-APP-PAGE -->
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>वॉच-लिस्ट</title>
+<style>
+/* Layout: phone app shell — one scrolling screen at a time, bottom tab bar on the three main tabs. Dark only, by design. */
+:root {
+  --bg: #121419;
+  --surface: #1B1E26;
+  --surface2: #232733;
+  --fg: #EDEEF2;
+  --muted: #A3A9B7;
+  --dim: #6E7483;
+  --line: #2E3340;
+  --accent: #F27D91;
+  --accent-bg: #3A1D25;
+  --primary: #B8304A;
+  --ok: #6CC891; --ok-bg: #173024;
+  --warn: #E3B04F; --warn-bg: #362A12;
+  --likely: #8EA8E6; --likely-bg: #1E2740;
+  --danger: #F2857B; --danger-line: #6B2A33;
+  --font-display: "Noto Serif Devanagari", "Noto Serif", serif;
+  --font-body: "Noto Sans Devanagari", "Roboto", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5; -webkit-tap-highlight-color: transparent; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3, p { margin: 0; }
+
+#app { height: 100%; display: flex; flex-direction: column; }
+.screen { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
+.screen[hidden] { display: none !important; }
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 22px 20px 10px; }
+.head.small { align-items: center; padding: 12px 12px 6px; justify-content: flex-start; gap: 6px; }
+.title { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.2; }
+.title.sm { font-size: 22px; }
+.subtitle { font-size: 13px; color: var(--muted); }
+.body { display: flex; flex-direction: column; gap: 18px; padding: 6px 20px 24px; }
+.icon-btn { width: 44px; height: 44px; border-radius: 22px; border: 0; background: var(--surface); color: var(--fg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.icon-btn.bare { background: transparent; }
+
+.card { background: var(--surface); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.card.tight { border-radius: 16px; padding: 14px; gap: 10px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent); }
+.eyebrow.warn { color: var(--warn); }
+.tile { width: 64px; height: 88px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 34px; color: var(--fg); flex-shrink: 0; }
+.tile.big { width: 76px; height: 104px; border-radius: 14px; font-size: 40px; }
+.row { display: flex; gap: 14px; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.name-lg { font-size: 24px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; background: none; border: 0; padding: 0; text-align: left; color: var(--fg); }
+.meta { font-size: 13px; color: var(--muted); }
+.bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.bar > div { height: 100%; border-radius: 4px; background: var(--accent); }
+.bar.thin { height: 6px; }
+.split { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.btn { min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--fg); font-size: 14px; }
+.btn.primary { border: 0; background: var(--primary); color: #fff; font-weight: 700; }
+.btn.big { min-height: 58px; border-radius: 16px; font-size: 19px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.btn.wide { width: 100%; }
+.btn.danger { border-color: var(--danger-line); color: var(--danger); }
+.btn.dashed { border-style: dashed; color: var(--muted); }
+.btn:disabled { color: var(--dim); cursor: default; }
+.link { background: none; border: 0; color: var(--accent); font-size: 14px; padding: 8px 0; }
+
+.section-title { font-size: 17px; font-weight: 700; }
+.section-label { font-size: 15px; font-weight: 700; color: var(--muted); }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.qrow { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border-radius: 14px; background: var(--surface); border: 0; width: 100%; text-align: left; color: var(--fg); }
+.qrow.current { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--primary); }
+.qrow.done .qname { text-decoration: line-through; color: var(--muted); }
+.qnum { width: 32px; height: 32px; flex-shrink: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--surface2); color: var(--accent); }
+.qrow.current .qnum { background: var(--primary); color: #fff; }
+.qrow.done .qnum { background: var(--ok-bg); color: var(--ok); }
+.qname { font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+.qmeta { font-size: 12px; color: var(--muted); }
+.pill { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: var(--accent-bg); color: var(--accent); white-space: nowrap; }
+.chev { flex-shrink: 0; color: var(--muted); }
+.upnext { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface); border-radius: 16px; border: 0; width: 100%; text-align: left; color: var(--fg); }
+.upnum { width: 28px; font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.stat { display: flex; gap: 12px; align-items: center; padding: 14px; background: var(--surface2); border-radius: 16px; font-size: 14px; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.fchip { height: 36px; padding: 0 14px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font-size: 14px; }
+.fchip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 700; }
+.tag { font-size: 12px; padding: 3px 10px; border-radius: 10px; background: var(--surface2); color: var(--muted); }
+.tag.ok { background: var(--ok-bg); color: var(--ok); }
+.tag.likely { background: var(--likely-bg); color: var(--likely); }
+.tag.check { background: var(--warn-bg); color: var(--warn); }
+.h-ok { color: var(--ok); } .h-likely { color: var(--likely); } .h-check { color: var(--warn); }
+
+.seasons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.schip { min-width: 44px; height: 40px; flex-shrink: 0; padding: 0 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--fg); font-size: 14px; font-weight: 700; }
+.schip.past { background: var(--ok-bg); color: var(--ok); }
+.schip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.stepper { display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; gap: 10px; }
+.step { width: 56px; height: 56px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface2); color: var(--fg); display: flex; align-items: center; justify-content: center; }
+.step.plus { border: 0; background: var(--primary); color: #fff; }
+.count { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.count b { font-family: var(--font-display); font-size: 34px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.count small { font-size: 18px; color: var(--muted); }
+
+.char { display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 12px; border-radius: 14px; background: var(--surface); }
+.char .cn { font-size: 15px; font-weight: 700; }
+.char .ct { font-size: 12px; }
+.x { width: 32px; height: 32px; border: 0; border-radius: 16px; background: transparent; color: var(--muted); display: flex; align-items: center; justify-content: center; }
+.ct-0 { color: var(--accent); } .ct-1 { color: var(--likely); } .ct-2 { color: var(--warn); } .ct-3 { color: var(--ok); } .ct-4 { color: #C9A3F0; }
+.note { display: flex; gap: 8px; align-items: flex-start; padding: 12px 8px 12px 14px; border-radius: 14px; background: var(--surface); }
+.note .nl { font-size: 12px; color: var(--muted); }
+.note .nt { font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-line; }
+
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); min-width: 0; }
+.field input, .field select, .field textarea { min-height: 46px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 15px; width: 100%; }
+.field textarea { padding: 10px 12px; min-height: 76px; resize: vertical; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.err { color: var(--danger); font-size: 13px; }
+.panel { background: var(--surface2); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.scores { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; max-width: 560px; }
+.score { height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--fg); font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.score[aria-pressed="true"] { background: var(--warn); border-color: var(--warn); color: var(--bg); }
+.diary { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 16px; background: var(--surface); }
+.diary-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.diary-name { font-size: 17px; font-weight: 700; background: none; border: 0; padding: 0; color: var(--fg); text-align: left; }
+.rating { font-size: 15px; font-weight: 700; color: var(--warn); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.quote { font-size: 15px; line-height: 1.5; }
+.empty { color: var(--muted); font-size: 14px; }
+.footer-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 12px 20px 16px; border-top: 1px solid var(--line); background: var(--surface); flex-shrink: 0; }
+.footer-actions[hidden] { display: none; }
+.code { width: 100%; min-height: 96px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-family: monospace; font-size: 12px; word-break: break-all; resize: none; }
+a.btn { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+
+nav.tabs { height: 74px; flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center; background: var(--surface); border-top: 1px solid var(--line); padding: 0 8px; }
+nav.tabs[hidden] { display: none; }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: transparent; color: var(--muted); font-size: 12px; min-height: 56px; justify-content: center; }
+.tab[aria-current="page"] { color: var(--accent); font-weight: 700; }
+.fab { justify-self: center; width: 56px; height: 56px; border: 0; border-radius: 28px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; }
+
+#snack { position: fixed; left: 16px; right: 16px; bottom: 86px; background: #EDEEF2; color: #121419; border-radius: 14px; padding: 10px 10px 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+#snack[hidden] { display: none; }
+#snack.low { bottom: 16px; }
+#snack button { border: 0; background: transparent; color: #8C1C2E; font-weight: 700; font-size: 14px; min-height: 40px; padding: 0 8px; }
+@media (max-width: 360px) { .grid2 { grid-template-columns: 1fr; } .title { font-size: 26px; } }
+
+/* ---------- Tablet ----------
+   Phone: bottom tab bar, one screen at a time.
+   From 600px wide (tablet upright, phone sideways): a navigation rail on the left and content kept to a readable width.
+   From 840px wide (tablet sideways): the list and the series detail sit side by side, like Gmail or Netflix on a tablet. */
+#stage { flex: 1; min-height: 0; min-width: 0; display: flex; }
+.pane { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.pane[hidden] { display: none !important; }
+.screen > .head, .screen > .body { width: 100%; max-width: var(--maxw, none); margin-left: auto; margin-right: auto; }
+.tab .ind { display: flex; align-items: center; justify-content: center; width: 56px; height: 32px; border-radius: 16px; }
+.tab.settings { display: none; }
+.fab { order: 4; }
+nav.tabs { order: 2; }
+.now-side { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.pane-empty { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 32px; color: var(--muted); font-size: 15px; }
+.qrow.sel, .diary.sel { background: var(--surface2); box-shadow: inset 4px 0 0 var(--accent); }
+.has-dot { position: relative; }
+.has-dot::after { content: ""; position: absolute; top: 4px; right: 4px; width: 10px; height: 10px; border-radius: 5px; background: var(--warn); box-shadow: 0 0 0 2px var(--surface); }
+.whatsnew { border: 1px solid var(--ok-bg); }
+.notes { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+#scr-now .now-grid > .span-all { grid-column: 1 / -1; }
+.qrow.current.sel { box-shadow: inset 4px 0 0 var(--accent), inset 0 0 0 1px var(--primary); }
+
+@media (min-width: 600px) {
+  #app { flex-direction: row; }
+  nav.tabs { order: 0; width: 92px; height: auto; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 0 14px; border-top: 0; border-right: 1px solid var(--line); overflow-y: auto; }
+  .fab { order: 0; flex-shrink: 0; border-radius: 16px; margin-bottom: 16px; }
+  .tab { width: 80px; min-height: 64px; flex-shrink: 0; gap: 4px; }
+  .tab[aria-current="page"] .ind { background: var(--accent-bg); }
+  .tab.settings { display: flex; margin-top: auto; }
+  .hide-rail { display: none !important; }
+  .screen { --maxw: 720px; }
+  .head { padding-top: 28px; }
+  #snack { left: 108px; right: auto; width: min(480px, calc(100% - 124px)); }
+}
+@media (min-width: 600px) and (max-height: 520px) {
+  nav.tabs { gap: 2px; padding: 10px 0; }
+  .fab { width: 48px; height: 48px; margin-bottom: 6px; }
+  .tab { min-height: 52px; }
+}
+@media (min-width: 840px) {
+  #scr-now { --maxw: 1100px; }
+  #scr-now .body.now-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  #scr-settings { --maxw: 1040px; }
+  #scr-settings .body.settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  #scr-settings .settings-grid > .span2 { grid-column: 1 / -1; }
+  #scr-add { --maxw: 680px; }
+  #stage.two > .screen:not([hidden]) { flex: 0 0 clamp(340px, 38%, 440px); border-right: 1px solid var(--line); --maxw: none; }
+  #stage.two #scr-detail { --maxw: 820px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <nav class="tabs" id="tabs" aria-label="मुख्य मेनू"></nav>
+  <div id="stage">
+    <section class="screen" id="scr-now" aria-label="अभी"></section>
+    <section class="screen" id="scr-queue" aria-label="सूची" hidden></section>
+    <section class="screen" id="scr-finished" aria-label="देख लीं" hidden></section>
+    <div class="pane" id="detail-pane" hidden>
+      <section class="screen" id="scr-detail" aria-label="सीरीज़ विवरण"></section>
+      <div class="footer-actions" id="detail-actions" hidden></div>
+    </div>
+    <section class="screen" id="scr-add" aria-label="नई सीरीज़" hidden></section>
+    <section class="screen" id="scr-settings" aria-label="सेटिंग और बैकअप" hidden></section>
+  </div>
+</div>
+<div id="snack" role="status" aria-live="polite" hidden><span id="snack-text"></span><button type="button" id="snack-undo">वापस करें</button></div>
+
+<script>
+'use strict';
+/* ---------- Catalog ---------- */
+const CATALOG = {
+  suits: { name: "Suits", where: "Netflix", hindi: "ok", why: "हार्वी, डोना, जेसिका और लुइस की कहानी पूरी कीजिए।", seasons: [12, 16, 16, 16, 16, 16, 16, 16, 10] },
+  hoc: { name: "House of Cards", where: "Netflix", hindi: "ok", why: "आपकी पक्की अगली सीरीज़। फ़्रैंक, क्लेयर और डग स्टैम्पर, यानी सत्ता एक भूख।", seasons: [13, 13, 13, 13, 13, 8] },
+  crown: { name: "The Crown", where: "Netflix", hindi: "ok", why: "फ़्रैंक के ठीक बाद उल्टा चेहरा: सत्ता एक बोझ। बचपन से बने किरदार, बाहर शांति और अंदर तूफ़ान।", seasons: [10, 10, 10, 10, 10, 10] },
+  diplomat: { name: "The Diplomat", where: "Netflix", hindi: "check", why: "राजनीति की तिकड़ी का तीसरा हिस्सा: सत्ता एक हुनर। केट और हैल, साथी भी और प्रतिद्वंद्वी भी।", seasons: [8, 6, 8] },
+  succession: { name: "Succession", where: "JioHotstar", hindi: "ok", hindiText: "हिंदी ✓ (आपने देखा)", why: "राजनीति से कारोबारी साम्राज्य पर। पिता की गद्दी के लिए बच्चों की लड़ाई।", seasons: [10, 10, 9, 10] },
+  narcos: { name: "Narcos", where: "Netflix", hindi: "ok", why: "असली कहानी। एस्कोबार गलियों से साम्राज्य तक, परिवार और वफ़ादार घेरे के साथ।", seasons: [10, 10, 10] },
+  lincoln: { name: "The Lincoln Lawyer", where: "Netflix", hindi: "check", hindiText: "हिंदी मिली तो ही", why: "भारी सीरीज़ के बाद हल्का ब्रेक। Suits जैसा अदालत का स्वाद और वफ़ादार छोटी टीम।", seasons: [10, 10, 10, 10] },
+  vikings: { name: "Vikings", where: "Netflix", hindi: "ok", why: "किसान-योद्धा से राजा तक। भाई रोलो, लैगर्था और फ़्लोकी के साथ फ़ैमिली पॉलिटिक्स।", seasons: [9, 10, 10, 20, 20, 20] },
+  moneyheist: { name: "Money Heist", where: "Netflix", hindi: "ok", why: "अजनबियों की टीम जो परिवार बन जाती है। प्रोफ़ेसर का दिमाग़ और बर्लिन का करिश्मा।", seasons: [13, 9, 8, 8, 10], unit: "भाग" },
+  guinness: { name: "House of Guinness", where: "Netflix", hindi: "likely", why: "Peaky Blinders के निर्माता की कहानी। ब्रुअरी साम्राज्य के लिए चार भाई-बहनों की खींचतान।", seasons: [8] },
+  hotd: { name: "House of the Dragon", where: "JioHotstar", hindi: "ok", why: "GoT की पूर्व-कथा। कहानी अभी अधूरी है, इसलिए आख़िर में रखी है।", seasons: [10, 8, 8] },
+  gentlemen: { name: "The Gentlemen", where: "Netflix", hindi: "ok", why: "गाय रिची की सीरीज़, Peaky जैसा अंदाज़। ख़ानदानी जायदाद के साथ विरासत में मिला धंधा।", seasons: [8] },
+  billions: { name: "Billions", where: "प्लेटफ़ॉर्म जाँचें", hindi: "check", why: "किरदारों में सबसे सटीक मेल। एक्स, उसका वफ़ादार वैग्स, और शेयर बाज़ार की दुनिया।", seasons: [12, 12, 12, 12, 12, 12, 12] },
+  bcs: { name: "Better Call Saul + Breaking Bad", where: "प्लेटफ़ॉर्म जाँचें", hindi: "check", hindiText: "हिंदी सिर्फ़ TV पर आई थी", why: "जिमी टिरियन जैसा है: चालाक, पर दिल वाला। फिर वॉल्टर का दिमाग़ से साम्राज्य।", seasons: [10, 10, 10, 10, 10, 13, 7, 13, 13, 13, 16], labels: ["BCS 1", "BCS 2", "BCS 3", "BCS 4", "BCS 5", "BCS 6", "BB 1", "BB 2", "BB 3", "BB 4", "BB 5"] },
+  narcosmx: { name: "Narcos: Mexico", where: "Netflix", hindi: "check", why: "Narcos के बाद उसी कहानी का अगला हिस्सा।", seasons: [10, 10, 10] },
+  designated: { name: "Designated Survivor", where: "प्लेटफ़ॉर्म जाँचें", hindi: "check", why: "एक मामूली मंत्री अचानक राष्ट्रपति। अनचाही सत्ता और मूल्य।", seasons: [21, 22, 10] },
+  ozark: { name: "Ozark", where: "Netflix", hindi: "check", why: "एक फ़ाइनेंशियल एडवाइज़र, कार्टेल का पैसा और परिवार ही अंदरूनी घेरा।", seasons: [10, 10, 10, 14] }
+};
+const DEFAULT_LAYOUT = {
+  main: ["suits", "hoc", "crown", "diplomat", "succession", "narcos", "lincoln", "vikings", "moneyheist", "guinness", "hotd"],
+  break: ["gentlemen"],
+  maybe: ["billions", "bcs", "narcosmx", "designated", "ozark"],
+  archive: []
+};
+const LISTS = ["main", "break", "maybe", "archive"];
+const LIST_NAME = { main: "मुख्य क्रम", break: "छोटा ब्रेक", maybe: "हिंदी मिले तो देखें", archive: "पहले देखी हुई" };
+const H = { ok: "हिंदी ✓", likely: "हिंदी लगभग पक्की", check: "हिंदी जाँचें" };
+const CHAR_TYPES = ["धूसर नायक", "सब संभालने वाला स्तंभ", "पिछली कहानी", "क्षमता वाला शिष्य", "अथॉरिटी वाला विरोधी"];
+const TILE_COLORS = ["#2B3A5C", "#3D2B52", "#2C4A43", "#4A3426", "#2E3E52", "#4A2B37", "#3A4426"];
+const KEY = "abhimanyu-watchlist-v2";
+const OLD_KEY = "abhimanyu-watchlist-done";
+const VERSION = "3.0";
+// BUILD goes up by one on every live update; docs/version.json must carry the same number.
+const BUILD = 30;
+// Which Android shell is running this page: the starter page sets it; 0 means a plain browser.
+const SHELL = (window.WL_SHELL | 0) || (parseInt(new URLSearchParams(location.search).get("shell"), 10) || 0);
+const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
+const APK_URL = "https://github.com/abhimanyugaur58-stack/Watchlist/releases/latest";
+// Shown once in the "क्या नया है" card after the update arrives.
+const CHANGES = {
+  30: [
+    "लाइव अपडेट: नए फ़ीचर अब इंटरनेट से अपने आप आएँगे। ऐप दोबारा इंस्टॉल नहीं करना पड़ेगा।",
+    "हर अपडेट के बाद यहीं बताया जाएगा कि क्या बदला।",
+    "बैकअप की याद: 15 दिन से बैकअप नहीं लिया हो, तो सेटिंग के निशान पर पीला बिंदु दिखेगा।"
+  ]
+};
+const MQ_MEDIUM = window.matchMedia("(min-width: 600px)");
+const MQ_WIDE = window.matchMedia("(min-width: 840px)");
+function isMedium() { return MQ_MEDIUM.matches; }
+function isWide() { return MQ_WIDE.matches; }
+
+/* ---------- State ---------- */
+let state = loadState(readStore());
+function readStore() {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { s = null; }
+  if (!s || typeof s !== "object") {
+    s = {};
+    try { const old = JSON.parse(localStorage.getItem(OLD_KEY) || "null"); if (Array.isArray(old)) s.done = old; } catch (e) {}
+  }
+  return s;
+}
+function obj(x) { return x && typeof x === "object" && !Array.isArray(x) ? x : {}; }
+function loadState(s) {
+  s = obj(s);
+  s.done = Array.isArray(s.done) ? s.done.filter(x => typeof x === "string") : [];
+  s.custom = obj(s.custom);
+  for (const id of Object.keys(s.custom)) {
+    const c = obj(s.custom[id]);
+    if (typeof c.name !== "string" || !c.name.trim()) { delete s.custom[id]; continue; }
+    if (!c.epsText && typeof c.eps === "string") c.epsText = c.eps; // series added in version 1.1
+    if (!Array.isArray(c.seasons) || !c.seasons.every(n => Number.isInteger(n) && n > 0)) c.seasons = null;
+    s.custom[id] = c;
+  }
+  s.removed = Array.isArray(s.removed) ? s.removed : [];
+  s.hindi = obj(s.hindi);
+  s.progress = obj(s.progress);
+  s.ratings = obj(s.ratings);
+  s.notes = obj(s.notes);
+  s.chars = obj(s.chars);
+  s.scenes = obj(s.scenes);
+  s.finishedOrder = Array.isArray(s.finishedOrder) ? s.finishedOrder : [];
+  s.pace = [1, 2, 3].includes(s.pace) ? s.pace : 1;
+  s.lastBackup = typeof s.lastBackup === "number" ? s.lastBackup : null;
+  s.layout = obj(s.layout);
+  const hadLayout = LISTS.slice(0, 3).some(L => Array.isArray(s.layout[L]));
+  if (!hadLayout) s.layout = JSON.parse(JSON.stringify(DEFAULT_LAYOUT));
+  for (const L of LISTS) if (!Array.isArray(s.layout[L])) s.layout[L] = [];
+  const known = id => Boolean(CATALOG[id] || s.custom[id]);
+  const seen = new Set();
+  for (const L of LISTS) s.layout[L] = s.layout[L].filter(id => known(id) && !seen.has(id) && seen.add(id));
+  for (const L of LISTS) for (const id of DEFAULT_LAYOUT[L]) if (!seen.has(id) && !s.removed.includes(id)) { s.layout[L].push(id); seen.add(id); }
+  for (const id of Object.keys(s.custom)) if (!seen.has(id)) { s.layout.main.push(id); seen.add(id); }
+
+  s.seeded2 = true;
+  for (const id of s.done) if (!s.finishedOrder.includes(id)) s.finishedOrder.push(id);
+  s.finishedOrder = s.finishedOrder.filter(id => s.done.includes(id) && known(id));
+  s.v = 2;
+  return s;
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+/* ---------- Derived values ---------- */
+function base(id) { return CATALOG[id] || state.custom[id]; }
+function seasonsOf(id) { const b = base(id); return Array.isArray(b.seasons) && b.seasons.length ? b.seasons : null; }
+function hindiOf(id) { return state.hindi[id] || base(id).hindi || "check"; }
+function hindiText(id) { const b = base(id); return state.hindi[id] ? H[state.hindi[id]] : (b.hindiText || H[hindiOf(id)]); }
+function isDone(id) { return state.done.includes(id); }
+function prog(id) {
+  const p = state.progress[id];
+  if (!p || !Number.isInteger(p.s) || !Number.isInteger(p.e) || p.s < 1 || p.e < 0) return { s: 1, e: 0 };
+  const se = seasonsOf(id);
+  if (se && p.s > se.length) return { s: se.length, e: se[se.length - 1] };
+  if (se && p.e > se[p.s - 1]) return { s: p.s, e: se[p.s - 1] };
+  return p;
+}
+function totalEps(id) { const se = seasonsOf(id); return se ? se.reduce((a, b) => a + b, 0) : null; }
+function watchedEps(id) {
+  const se = seasonsOf(id);
+  if (!se) return null;
+  if (isDone(id)) return totalEps(id);
+  const p = prog(id);
+  const s = Math.min(p.s, se.length);
+  let w = 0;
+  for (let i = 0; i < s - 1; i++) w += se[i];
+  return w + Math.min(p.e, se[s - 1]);
+}
+function remainingEps(id) { const t = totalEps(id); return t == null ? null : t - watchedEps(id); }
+function seasonLabel(id, n) { const b = base(id); if (b.labels && b.labels[n - 1]) return b.labels[n - 1]; return (b.unit || "सीज़न") + " " + n; }
+function sizeText(id) {
+  const b = base(id); const se = seasonsOf(id);
+  if (se) return se.length + " " + (b.unit || "सीज़न") + " · " + totalEps(id) + " एपिसोड";
+  return b.epsText || "";
+}
+function listOf(id) { return LISTS.find(L => state.layout[L].includes(id)); }
+function currentId() { return state.layout.main.find(id => !isDone(id)) || null; }
+function atEnd(id) { const se = seasonsOf(id); if (!se) return false; const p = prog(id); return p.s >= se.length && p.e >= se[se.length - 1]; }
+function nextEpText(id) {
+  const se = seasonsOf(id); const p = prog(id);
+  if (!se) return seasonLabel(id, p.s) + ", एपिसोड " + (p.e + 1);
+  if (atEnd(id)) return "";
+  if (p.e < se[p.s - 1]) return seasonLabel(id, p.s) + ", एपिसोड " + (p.e + 1);
+  return seasonLabel(id, p.s + 1) + ", एपिसोड 1";
+}
+function posText(id) {
+  const p = prog(id);
+  if (p.e === 0) return seasonLabel(id, p.s) + " शुरू करना है";
+  return seasonLabel(id, p.s) + " · एपिसोड " + p.e + " पूरा";
+}
+function mainRemaining() { return state.layout.main.filter(id => !isDone(id)).reduce((a, id) => a + (remainingEps(id) || 0), 0); }
+function monthsText(eps, pace) {
+  const days = eps / pace;
+  if (days <= 0) return "कुछ नहीं बचा";
+  if (days < 30) return "लगभग " + Math.max(1, Math.round(days)) + " दिन";
+  return "लगभग " + Math.round(days / 30) + " महीने";
+}
+function tileColor(id) { let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return TILE_COLORS[h % TILE_COLORS.length]; }
+function initial(name) { const m = name.trim().match(/[A-Za-z0-9ऀ-ॿ]/); return m ? m[0].toUpperCase() : "★"; }
+
+/* ---------- Actions (each one can be undone) ---------- */
+let undoSnapshot = null;
+function change(fn, message, opts) {
+  const snap = JSON.stringify(state);
+  fn();
+  save();
+  undoSnapshot = snap;
+  render();
+  if (message) snack(message, !(opts && opts.noUndo));
+}
+function plusEp(id) {
+  change(() => {
+    const se = seasonsOf(id); const p = Object.assign({}, prog(id));
+    if (!se) p.e += 1;
+    else if (p.e < se[p.s - 1]) p.e += 1;
+    else if (p.s < se.length) { p.s += 1; p.e = 1; }
+    state.progress[id] = p;
+  }, null);
+  const p = prog(id);
+  snack(seasonLabel(id, p.s) + ", एपिसोड " + p.e + " देखा", true);
+}
+function minusEp(id) {
+  change(() => {
+    const se = seasonsOf(id); const p = Object.assign({}, prog(id));
+    if (p.e > 0) p.e -= 1;
+    else if (p.s > 1) { p.s -= 1; p.e = se ? se[p.s - 1] - 1 : 0; }
+    state.progress[id] = p;
+  }, "एक एपिसोड कम किया");
+}
+function pickSeason(id, n) {
+  change(() => { state.progress[id] = { s: n, e: 0 }; }, seasonLabel(id, n) + " चुना");
+}
+function finish(id) {
+  change(() => {
+    if (!state.done.includes(id)) state.done.push(id);
+    state.finishedOrder = [id].concat(state.finishedOrder.filter(x => x !== id));
+    const se = seasonsOf(id);
+    if (se) state.progress[id] = { s: se.length, e: se[se.length - 1] };
+  }, null);
+  ui.draftScore = 0;
+  ui.sel.finished = id;
+  tabGo("finished");
+  snack("“" + base(id).name + "” पूरी! अब अंक दीजिए", true);
+}
+function unfinish(id) {
+  change(() => {
+    state.done = state.done.filter(x => x !== id);
+    state.finishedOrder = state.finishedOrder.filter(x => x !== id);
+    delete state.ratings[id];
+    if (listOf(id) === "archive") { state.layout.archive = state.layout.archive.filter(x => x !== id); state.layout.main.push(id); }
+    const se = seasonsOf(id);
+    if (se) state.progress[id] = { s: se.length, e: Math.max(0, se[se.length - 1] - 1) };
+  }, "फिर से सूची में डाल दी");
+}
+function place(id, target) {
+  for (const L of LISTS) state.layout[L] = state.layout[L].filter(x => x !== id);
+  const [L, anchor] = target.split(":");
+  if (L !== "main") { state.layout[L].push(id); return; }
+  if (anchor === "0") { state.layout.main.unshift(id); return; }
+  const i = state.layout.main.indexOf(anchor);
+  if (i < 0) state.layout.main.push(id); else state.layout.main.splice(i + 1, 0, id);
+}
+function currentPlace(id) {
+  const L = listOf(id);
+  if (L !== "main") return L + ":end";
+  const i = state.layout.main.indexOf(id);
+  return i === 0 ? "main:0" : "main:" + state.layout.main[i - 1];
+}
+function lastMainPlace() { const m = state.layout.main; return m.length ? "main:" + m[m.length - 1] : "main:0"; }
+function removeSeries(id) {
+  const name = base(id).name;
+  change(() => {
+    for (const L of LISTS) state.layout[L] = state.layout[L].filter(x => x !== id);
+    state.done = state.done.filter(x => x !== id);
+    state.finishedOrder = state.finishedOrder.filter(x => x !== id);
+    if (CATALOG[id]) { if (!state.removed.includes(id)) state.removed.push(id); }
+    else delete state.custom[id];
+  }, null);
+  ui.panel = null;
+  // Side-by-side view: the list stays, the next series fills the right side. Otherwise step back a screen.
+  if (!(view.two && screen !== "detail")) back();
+  snack("“" + name + "” हटा दी गई", true);
+}
+
+/* ---------- Backup ---------- */
+function backupCode() {
+  const json = JSON.stringify(state);
+  return "WL2:" + btoa(unescape(encodeURIComponent(json)));
+}
+function parseBackup(code) {
+  const c = code.trim().replace(/\s+/g, "");
+  if (!c.startsWith("WL2:")) return null;
+  try { return loadState(JSON.parse(decodeURIComponent(escape(atob(c.slice(4)))))); } catch (e) { return null; }
+}
+
+/* ---------- Live update ----------
+   The Android app starts with a small starter page (index.html in the APK). It runs the newest app page this phone
+   has downloaded, or else the copy bundled in the APK. This page checks GitHub for a newer one and keeps it ready. */
+const LIVE = { status: "idle", info: null, msg: "" }; // idle | checking | latest | ready | needApk | error
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+function codeLooksRunnable(html) {
+  if (typeof html !== "string" || html.length < 2000 || html.indexOf("WATCHLIST-APP-PAGE") < 0) return false;
+  const parts = html.match(/<script>[\s\S]*?<\/script>/g) || [];
+  if (!parts.length) return false;
+  try { for (const part of parts) new Function(part.slice(8, -9)); } catch (e) { return false; }
+  return true;
+}
+async function checkUpdate(manual) {
+  if (!SHELL || LIVE.status === "checking") return;
+  LIVE.status = "checking"; LIVE.msg = "";
+  if (manual) render();
+  try {
+    const r = await fetch(LIVE_BASE + "version.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("http " + r.status);
+    const info = await r.json();
+    lsSet("wl-last-check", String(Date.now()));
+    LIVE.info = info;
+    const have = parseInt(lsGet("wl-code-v") || "0", 10) || 0;
+    if (!(info.build > BUILD)) LIVE.status = "latest";
+    else if ((info.minShell || 0) > SHELL) LIVE.status = "needApk";
+    else if (String(info.build) === lsGet("wl-bad-v")) {
+      LIVE.status = "error"; LIVE.msg = "नया संस्करण पिछली बार ठीक से नहीं खुला, इसलिए रोक दिया है। Claude को बताइए।";
+    } else if (have >= info.build && lsGet("wl-code")) LIVE.status = "ready";
+    else {
+      const c = await fetch(LIVE_BASE + "app.html?b=" + info.build, { cache: "no-store" });
+      if (!c.ok) throw new Error("http " + c.status);
+      const code = await c.text();
+      if (!codeLooksRunnable(code)) throw new Error("bad page");
+      if (!lsSet("wl-code", code) || !lsSet("wl-code-v", String(info.build))) throw new Error("storage");
+      lsSet("wl-code-name", info.version || "");
+      LIVE.status = "ready";
+    }
+  } catch (e) {
+    LIVE.status = "error";
+    LIVE.msg = navigator.onLine === false ? "इंटरनेट नहीं है। इंटरनेट आने पर फिर जाँचिए।" : "अपडेट की जगह से सही जवाब नहीं मिला। थोड़ी देर बाद फिर जाँचिए।";
+  }
+  if (manual || LIVE.status === "ready" || LIVE.status === "needApk" || screen === "settings") render();
+}
+// The starter page picks up the downloaded copy.
+function applyUpdate() { location.replace("index.html"); }
+function readyName() { return (LIVE.info && LIVE.info.version) || lsGet("wl-code-name") || ""; }
+function backupDue() { return !state.lastBackup || Date.now() - state.lastBackup > 15 * 864e5; }
+function whenText(ms) { const d = new Date(ms); return d.getDate() + "/" + (d.getMonth() + 1) + " " + d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0"); }
+
+/* ---------- Navigation ---------- */
+let screen = "now";
+let detailId = null;
+let filter = "all";
+const ui = { panel: null, draftScore: 0, restoreMsg: "", restoreConfirm: null, backupShown: "", copyMsg: "", copyOk: false, restoreDraft: "",
+  sel: { queue: null, finished: null }, detailFrom: "queue" };
+// What the last render showed: side by side or not, which list, which series on the right.
+const view = { two: false, listTab: "now", paneId: null };
+function finishedIds() { return state.finishedOrder.filter(id => isDone(id) && base(id)); }
+function selFor(tab) {
+  const ids = tab === "finished" ? finishedIds() : [].concat(state.layout.main, state.layout.break, state.layout.maybe);
+  if (ui.sel[tab] && ids.includes(ui.sel[tab])) return ui.sel[tab];
+  return (tab === "queue" ? currentId() : null) || ids[0] || null;
+}
+function openDetail(id) {
+  if (isWide()) {
+    const fromFinished = screen === "finished" || (screen === "detail" && ui.detailFrom === "finished");
+    const tab = fromFinished && isDone(id) ? "finished" : "queue";
+    ui.sel[tab] = id;
+    if (screen === tab) {
+      ui.panel = null;
+      render();
+      const d = document.getElementById("scr-detail"); if (d) d.scrollTop = 0;
+    } else tabGo(tab);
+    return;
+  }
+  ui.detailFrom = TABS.includes(screen) ? screen : (ui.detailFrom || "queue");
+  go("detail", id);
+}
+const TABS = ["now", "queue", "finished"];
+// History depth: "अभी" is always depth 0, the other two tabs depth 1, anything opened from them deeper.
+// So the phone's back button walks back one screen at a time and leaves the app from "अभी".
+function curDepth() { const st = history.state; return st && Number.isInteger(st.d) ? st.d : 0; }
+function go(scr, id, push, replace) {
+  screen = scr;
+  detailId = id || null;
+  ui.panel = null;
+  try {
+    const d = curDepth();
+    if (replace) history.replaceState({ scr, id: detailId, d }, "");
+    else if (push !== false) history.pushState({ scr, id: detailId, d: d + 1 }, "");
+  } catch (e) {}
+  render();
+  const el = document.getElementById("scr-" + scr);
+  if (el) el.scrollTop = 0;
+}
+let pendingTab = null;
+function tabGo(id) {
+  const want = id === "now" ? 0 : 1;
+  const d = curDepth();
+  if (screen === id && d === want) return;
+  if (d === want - 1) { go(id); return; }
+  if (d === want) { go(id, null, false, true); return; }
+  pendingTab = id;
+  try { history.go(want - d); } catch (e) { pendingTab = null; go(id, null, false, true); }
+}
+window.addEventListener("popstate", e => {
+  ui.panel = null;
+  if (pendingTab) {
+    const t = pendingTab; pendingTab = null;
+    screen = t; detailId = null;
+    try { history.replaceState({ scr: t, id: null, d: curDepth() }, ""); } catch (err) {}
+    render();
+    return;
+  }
+  const st = e.state || { scr: "now" };
+  screen = st.scr || "now";
+  detailId = st.id || null;
+  if (screen === "detail" && (!detailId || !base(detailId))) screen = "now";
+  render();
+});
+function back() { if (curDepth() > 0) { try { history.back(); return; } catch (e) {} } go("now", null, false, true); }
+
+/* ---------- DOM helpers ---------- */
+function h(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (k === "style") n.setAttribute("style", v);
+    else n.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) n.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  return n;
+}
+const SVG_NS = "http://www.w3.org/2000/svg";
+const ICONS = {
+  plus: "M12 5v14M5 12h14", minus: "M5 12h14", chev: "M9 6l6 6-6 6", back: "M15 6l-6 6 6 6",
+  list: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+  star: "M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z",
+  play: "M10 8.5l5 3.5-5 3.5z", x: "M6 6l12 12M18 6L6 18",
+  cal: "M3 10h18M8 3v4M16 3v4", download: "M12 4v11M7 10l5 5 5-5M5 20h14", copy: "M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1",
+  gear: "M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
+};
+function icon(name, size, stroke) {
+  const s = document.createElementNS(SVG_NS, "svg");
+  s.setAttribute("width", size || 22); s.setAttribute("height", size || 22); s.setAttribute("viewBox", "0 0 24 24");
+  s.setAttribute("fill", "none"); s.setAttribute("stroke", stroke || "currentColor"); s.setAttribute("stroke-width", name === "plus" || name === "minus" ? "2.4" : "2");
+  s.setAttribute("stroke-linecap", "round"); s.setAttribute("stroke-linejoin", "round"); s.setAttribute("aria-hidden", "true");
+  if (name === "play" || name === "gear") { const c = document.createElementNS(SVG_NS, "circle"); c.setAttribute("cx", "12"); c.setAttribute("cy", "12"); c.setAttribute("r", name === "play" ? "9" : "3"); s.append(c); }
+  if (name === "cal") { const r = document.createElementNS(SVG_NS, "rect"); r.setAttribute("x", "3"); r.setAttribute("y", "5"); r.setAttribute("width", "18"); r.setAttribute("height", "16"); r.setAttribute("rx", "2"); s.append(r); }
+  if (name === "copy") { const r = document.createElementNS(SVG_NS, "rect"); r.setAttribute("x", "9"); r.setAttribute("y", "9"); r.setAttribute("width", "12"); r.setAttribute("height", "12"); r.setAttribute("rx", "2"); s.append(r); }
+  const p = document.createElementNS(SVG_NS, "path"); p.setAttribute("d", ICONS[name]); s.append(p);
+  return s;
+}
+function tile(id, big) { return h("div", { class: "tile" + (big ? " big" : ""), style: "background:" + tileColor(id), "aria-hidden": "true" }, initial(base(id).name)); }
+function hindiSpan(id) { return h("span", { class: "h-" + hindiOf(id), text: hindiText(id) }); }
+function placeSelect(selectId, excludeId, selected) {
+  const sel = h("select", { id: selectId });
+  const g = h("optgroup", { label: LIST_NAME.main });
+  g.append(h("option", { value: "main:0", text: "सबसे पहले" }));
+  let n = 0;
+  for (const id of state.layout.main) {
+    if (id === excludeId) continue;
+    n++;
+    g.append(h("option", { value: "main:" + id, text: n + ". " + base(id).name + " के बाद" }));
+  }
+  sel.append(g);
+  for (const L of ["break", "maybe"]) sel.append(h("option", { value: L + ":end", text: LIST_NAME[L] }));
+  sel.value = selected;
+  if (sel.value !== selected) sel.value = sel.options[n].value;
+  return sel;
+}
+
+/* ---------- Snackbar ---------- */
+let snackTimer = null;
+// Sit above the tab bar or the detail footer; drop to the bottom on screens that have neither.
+function placeSnack() {
+  const footer = !document.getElementById("detail-pane").hidden && !document.getElementById("detail-actions").hidden;
+  const bottomNav = !isMedium() && TABS.includes(screen);
+  document.getElementById("snack").classList.toggle("low", !(footer || bottomNav));
+}
+function snack(text, undoable) {
+  const el = document.getElementById("snack");
+  document.getElementById("snack-text").textContent = text;
+  document.getElementById("snack-undo").hidden = !undoable;
+  placeSnack();
+  el.hidden = false;
+  clearTimeout(snackTimer);
+  snackTimer = setTimeout(() => { el.hidden = true; }, 5000);
+}
+document.getElementById("snack-undo").addEventListener("click", () => {
+  if (!undoSnapshot) return;
+  state = loadState(JSON.parse(undoSnapshot));
+  undoSnapshot = null;
+  save();
+  if (screen === "detail" && (!detailId || !base(detailId))) screen = "queue";
+  render();
+  snack("वापस कर दिया", false);
+});
+
+/* ---------- Screens ---------- */
+function renderNow() {
+  const el = document.getElementById("scr-now");
+  const cur = currentId();
+  const head = h("header", { class: "head" },
+    h("div", { class: "col", style: "gap:2px" }, h("h1", { class: "title", text: "अभी" }), h("p", { class: "subtitle", text: "अभिमन्यु की वॉच-लिस्ट" })),
+    h("button", { class: "icon-btn hide-rail" + (backupDue() ? " has-dot" : ""), type: "button", "aria-label": backupDue() ? "सेटिंग और बैकअप (बैकअप बाकी)" : "सेटिंग और बैकअप", onclick: () => go("settings") }, icon("gear", 22)));
+  const body = h("main", { class: "body now-grid" });
+  const seenB = parseInt(lsGet("wl-seen-build") || "0", 10) || 0;
+  if (seenB < BUILD) {
+    const notes = Object.keys(CHANGES).map(Number).filter(b => b > seenB && b <= BUILD).sort((a, b) => a - b).reduce((a, b) => a.concat(CHANGES[b]), []);
+    if (notes.length) body.append(h("section", { class: "card whatsnew span-all", "aria-label": "क्या नया है" },
+      h("span", { class: "eyebrow", text: "क्या नया है · संस्करण " + VERSION }),
+      h("ul", { class: "notes" }, notes.map(t => h("li", { text: t }))),
+      h("button", { class: "btn", type: "button", style: "align-self:flex-start", onclick: () => { lsSet("wl-seen-build", String(BUILD)); render(); } }, "ठीक है")));
+    else lsSet("wl-seen-build", String(BUILD));
+  }
+  if (LIVE.status === "ready") body.append(h("section", { class: "stat span-all" },
+    h("span", { style: "color:var(--ok);display:flex" }, icon("download", 22)),
+    h("p", { style: "flex:1" }, "नया संस्करण " + readyName() + " तैयार है।"),
+    h("button", { class: "btn primary", type: "button", onclick: applyUpdate }, "अभी लगाएँ")));
+  if (!cur) {
+    body.append(h("section", { class: "card" },
+      h("span", { class: "eyebrow", text: "मुख्य सूची पूरी" }),
+      h("h2", { class: "title sm", text: "सब देख लीं!" }),
+      h("p", { class: "meta", text: "नई सीरीज़ जोड़िए, या \"हिंदी मिले तो देखें\" वाली सूची से कोई मुख्य क्रम में लाइए।" }),
+      h("button", { class: "btn primary big", type: "button", onclick: () => go("add") }, icon("plus", 22), "नई सीरीज़ जोड़ें")));
+  } else {
+    const se = seasonsOf(cur); const w = watchedEps(cur); const t = totalEps(cur);
+    const card = h("section", { class: "card", "aria-label": "अभी देख रहे हैं" },
+      h("span", { class: "eyebrow", text: "अभी देख रहे हैं" }),
+      h("div", { class: "row" }, tile(cur),
+        h("div", { class: "col" },
+          h("button", { class: "name-lg", type: "button", onclick: () => openDetail(cur) }, base(cur).name),
+          h("span", { class: "meta" }, base(cur).where + " · ", hindiSpan(cur)),
+          h("span", { style: "font-size:15px", text: posText(cur) }))));
+    if (se) card.append(h("div", { class: "col", style: "gap:6px" },
+      h("div", { class: "bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(t), "aria-valuenow": String(w), "aria-label": "प्रगति" }, h("div", { style: "width:" + Math.round(w / t * 100) + "%" })),
+      h("div", { class: "split" }, h("span", { text: w + " / " + t + " एपिसोड" }), h("span", { text: (t - w) + " बाकी" }))));
+    if (atEnd(cur)) {
+      card.append(h("button", { class: "btn primary big", type: "button", onclick: () => finish(cur) }, "पूरी सीरीज़ देख ली ✓"));
+      card.append(h("p", { class: "meta", text: "आख़िरी एपिसोड भी हो गया। अब अंक देने की बारी।" }));
+    } else {
+      card.append(h("button", { class: "btn primary big", type: "button", onclick: () => plusEp(cur) }, icon("plus", 22), "1 एपिसोड देखा"));
+      card.append(h("div", { class: "split" },
+        h("span", { text: "अगला: " + nextEpText(cur) }),
+        h("button", { class: "btn", type: "button", onclick: () => finish(cur) }, "पूरी सीरीज़ देख ली")));
+    }
+    body.append(card);
+
+    const side = h("div", { class: "now-side" });
+    const after = state.layout.main.filter(id => !isDone(id) && id !== cur).slice(0, isWide() ? 4 : isMedium() ? 3 : 2);
+    if (after.length) {
+      const sec = h("section", { class: "col", style: "gap:10px" },
+        h("div", { class: "split" }, h("h2", { class: "section-title", style: "color:var(--fg)", text: "इसके बाद" }),
+          h("button", { class: "link", type: "button", onclick: () => tabGo("queue") }, "पूरी सूची →")));
+      for (const id of after) {
+        const num = String(state.layout.main.indexOf(id) + 1).padStart(2, "0");
+        sec.append(h("button", { class: "upnext", type: "button", onclick: () => openDetail(id) },
+          h("span", { class: "upnum", text: num }),
+          h("span", { class: "col", style: "gap:2px;flex:1" }, h("span", { style: "font-size:16px;font-weight:700", text: base(id).name }), h("span", { class: "meta", text: base(id).where + " · " + sizeText(id) })),
+          h("span", { class: "chev" }, icon("chev", 18))));
+      }
+      side.append(sec);
+    }
+    const rem = mainRemaining();
+    side.append(h("section", { class: "stat" }, h("span", { style: "color:var(--warn);display:flex" }, icon("cal", 22)),
+      h("p", null, rem + " एपिसोड बाकी। रोज़ " + state.pace + " देखें तो " + monthsText(rem, state.pace) + "।")));
+    body.append(side);
+  }
+  el.replaceChildren(head, body);
+}
+
+function queueRow(id, label, cur) {
+  const done = isDone(id);
+  const rem = remainingEps(id);
+  const metaBits = [base(id).where];
+  if (!done) metaBits.push(id === cur && rem != null ? rem + " एपिसोड बाकी" : sizeText(id));
+  const sel = view.two && id === view.paneId;
+  return h("button", { class: "qrow" + (id === cur ? " current" : "") + (done ? " done" : "") + (sel ? " sel" : ""), type: "button", "aria-current": sel ? "true" : null, onclick: () => openDetail(id) },
+    h("span", { class: "qnum", text: done ? "✓" : label }),
+    h("span", { class: "col", style: "gap:1px;flex:1" },
+      h("span", { class: "qname", text: base(id).name }),
+      h("span", { class: "qmeta" }, metaBits.filter(Boolean).join(" · ") + " · ", hindiSpan(id))),
+    id === cur ? h("span", { class: "pill", text: "चल रही" }) : null,
+    h("span", { class: "chev" }, icon("chev", 16)));
+}
+function renderQueue() {
+  const el = document.getElementById("scr-queue");
+  const main = state.layout.main;
+  const doneCount = main.filter(isDone).length;
+  const cur = currentId();
+  const keep = id => filter === "all" || (filter === "hindi" ? hindiOf(id) === "ok" : (base(id).where || "").toLowerCase().includes(filter.toLowerCase()));
+  const chipDefs = [["all", "सभी"], ["Netflix", "Netflix"], ["JioHotstar", "JioHotstar"], ["hindi", "सिर्फ़ हिंदी ✓"]];
+  const head = h("header", { class: "head", style: "flex-direction:column;align-items:stretch;gap:12px" },
+    h("div", { class: "split" }, h("h1", { class: "title", text: "सूची" }), h("span", { class: "subtitle", text: doneCount + " / " + main.length + " पूरी" })),
+    h("div", { class: "chips", role: "group", "aria-label": "छाँटें" }, chipDefs.map(([id, label]) =>
+      h("button", { class: "fchip", type: "button", "aria-pressed": String(filter === id), onclick: () => { filter = id; render(); } }, label))));
+  const body = h("main", { class: "body", style: "gap:20px" });
+  const sections = [["main", i => String(i + 1).padStart(2, "0")], ["break", () => "☕"], ["maybe", () => "?"]];
+  let shown = 0;
+  for (const [L, lab] of sections) {
+    const ids = state.layout[L];
+    const rows = ids.map((id, i) => [id, i]).filter(([id]) => keep(id)).map(([id, i]) => queueRow(id, lab(i), cur));
+    shown += rows.length;
+    body.append(h("section", { class: "col", style: "gap:8px" }, h("h2", { class: "section-label", text: LIST_NAME[L] }),
+      rows.length ? h("div", { class: "list" }, rows) : h("p", { class: "empty", text: ids.length ? "इस छँटाई में यहाँ कुछ नहीं है।" : "यहाँ अभी कोई सीरीज़ नहीं है।" })));
+  }
+  el.replaceChildren(head, body);
+}
+
+function scoreButtons(selected, onPick) {
+  // Marks the chosen number in place, so a half-typed note next to it is not wiped.
+  const group = h("div", { class: "scores", role: "group", "aria-label": "अंक चुनें" });
+  for (let n = 1; n <= 10; n++) {
+    const b = h("button", { class: "score", type: "button", "aria-pressed": String(n === selected) }, String(n));
+    b.addEventListener("click", () => { for (const x of group.children) x.setAttribute("aria-pressed", String(x === b)); onPick(n); });
+    group.append(b);
+  }
+  return group;
+}
+function charChips(id, removable) {
+  const list = state.chars[id] || [];
+  return list.map((c, i) => h("span", { class: "char" },
+    h("span", { class: "col", style: "gap:0" }, h("span", { class: "cn", text: c.n }), h("span", { class: "ct ct-" + c.t, text: CHAR_TYPES[c.t] || "" })),
+    removable ? h("button", { class: "x", type: "button", "aria-label": c.n + " हटाएँ", onclick: () => change(() => { state.chars[id] = (state.chars[id] || []).filter((_, j) => j !== i); }, "किरदार हटाया") }, icon("x", 16)) : null));
+}
+function renderFinished() {
+  const el = document.getElementById("scr-finished");
+  const ids = state.finishedOrder.filter(id => isDone(id) && base(id));
+  const head = h("header", { class: "head", style: "align-items:baseline" }, h("h1", { class: "title", text: "देख लीं" }), h("span", { class: "subtitle", text: ids.length + " सीरीज़ पूरी" }));
+  const body = h("main", { class: "body" });
+  const pending = ids.find(id => !state.ratings[id]);
+  if (pending) {
+    const input = h("input", { id: "pending-note", type: "text", value: state.notes[pending] || "", placeholder: "जैसे: सबसे दमदार किरदार कौन था" });
+    const err = h("p", { class: "err", text: "पहले 1 से 10 में से अंक चुनिए।", hidden: true });
+    body.append(h("section", { class: "card", "aria-label": "अंक दीजिए" },
+      h("span", { class: "eyebrow warn", text: "अंक देना बाकी" }),
+      h("h2", { class: "title sm", text: base(pending).name + " को 10 में से कितने?" }),
+      scoreButtons(ui.draftScore, n => { ui.draftScore = n; err.hidden = true; }),
+      h("label", { class: "field", for: "pending-note" }, "एक लाइन में राय", input),
+      err,
+      h("button", { class: "btn primary big", type: "button", style: "font-size:17px;min-height:50px", onclick: () => {
+        if (!ui.draftScore) { err.hidden = false; return; }
+        const score = ui.draftScore; const note = input.value.trim();
+        ui.draftScore = 0;
+        change(() => { state.ratings[pending] = score; if (note) state.notes[pending] = note; else delete state.notes[pending]; }, "अंक सेव हो गए");
+      } }, "सेव करें")));
+  }
+  const diary = h("section", { class: "col", style: "gap:10px" }, h("h2", { class: "section-label", text: "आपकी डायरी" }));
+  if (!ids.length) diary.append(h("p", { class: "empty", text: "सीरीज़ पूरी होते ही यहाँ उसकी डायरी बनेगी।" }));
+  for (const id of ids) {
+    const r = state.ratings[id];
+    diary.append(h("article", { class: "diary" + (view.two && id === view.paneId ? " sel" : "") },
+      h("div", { class: "diary-head" },
+        h("button", { class: "diary-name", type: "button", onclick: () => openDetail(id) }, base(id).name),
+        r ? h("span", { class: "rating", text: r + " / 10" }) : h("span", { class: "rating", style: "font-weight:400;font-size:13px", text: "अंक बाकी" })),
+      sizeText(id) ? h("span", { class: "meta", text: sizeText(id) }) : null,
+      state.notes[id] ? h("p", { class: "quote", text: "“" + state.notes[id] + "”" }) : null,
+      (state.chars[id] || []).length ? h("div", { class: "chips" }, (state.chars[id] || []).map(c => h("span", { class: "tag", text: c.n + " · " + (CHAR_TYPES[c.t] || "") }))) : null));
+  }
+  body.append(diary);
+  el.replaceChildren(head, body);
+}
+
+function renderDetail(id, inPane) {
+  const el = document.getElementById("scr-detail");
+  const acts = document.getElementById("detail-actions");
+  if (!id || !base(id)) {
+    acts.hidden = true;
+    if (inPane) el.replaceChildren(h("div", { class: "pane-empty", text: view.listTab === "finished" ? "कोई सीरीज़ पूरी होते ही उसका विवरण यहाँ दिखेगा।" : "बाईं ओर की सूची से कोई सीरीज़ चुनिए।" }));
+    else el.replaceChildren();
+    return;
+  }
+  const b = base(id); const done = isDone(id); const se = seasonsOf(id); const p = prog(id);
+  const L = listOf(id);
+  const pos = L === "main" ? "सूची में " + String(state.layout.main.indexOf(id) + 1).padStart(2, "0") + " नंबर" : LIST_NAME[L] || "";
+  const head = h("header", { class: "head small", style: inPane ? "padding-left:20px;min-height:56px" : null },
+    inPane ? null : h("button", { class: "icon-btn bare", type: "button", "aria-label": "वापस", onclick: back }, icon("back", 24)),
+    h("span", { class: "subtitle", style: "font-size:15px", text: pos }));
+  const body = h("main", { class: "body" });
+
+  const tags = h("div", { class: "chips", style: "gap:6px" });
+  if (b.where) tags.append(h("span", { class: "tag", text: b.where }));
+  if (sizeText(id)) tags.append(h("span", { class: "tag", text: sizeText(id) }));
+  tags.append(h("span", { class: "tag " + hindiOf(id), text: hindiText(id) }));
+  body.append(h("section", { class: "row", style: "align-items:flex-start" }, tile(id, true),
+    h("div", { class: "col", style: "gap:8px" }, h("h1", { class: "title", style: "font-size:28px;overflow-wrap:anywhere", text: b.name }), tags,
+      b.why ? h("p", { class: "meta", style: "font-size:14px", text: b.why }) : null)));
+
+  // Episode tracker
+  const tracker = h("section", { class: "card", style: "border-radius:20px;padding:16px", "aria-label": "एपिसोड ट्रैकर" }, h("h2", { class: "section-title", text: done ? "पूरी देख ली ✓" : "कहाँ तक पहुँचे" }));
+  if (!done) {
+    if (se) {
+      tracker.append(h("div", { class: "seasons", role: "group", "aria-label": "सीज़न चुनें" }, se.map((_, i) => {
+        const n = i + 1; const lab = b.labels ? b.labels[i] : (b.unit === "भाग" ? "भाग " + n : "S" + n);
+        return h("button", { class: "schip" + (n < p.s ? " past" : ""), type: "button", "aria-pressed": String(n === p.s), onclick: () => { if (n !== p.s) pickSeason(id, n); } }, lab);
+      })));
+    } else {
+      tracker.append(h("div", { class: "split" }, h("span", { text: seasonLabel(id, p.s) }),
+        h("div", { class: "actions" },
+          h("button", { class: "btn", type: "button", "aria-label": "पिछला सीज़न", disabled: p.s <= 1, onclick: () => change(() => { state.progress[id] = { s: Math.max(1, p.s - 1), e: 0 }; }, "सीज़न बदला") }, "− सीज़न"),
+          h("button", { class: "btn", type: "button", "aria-label": "अगला सीज़न", onclick: () => change(() => { state.progress[id] = { s: p.s + 1, e: 0 }; }, "सीज़न बदला") }, "+ सीज़न"))));
+    }
+    const total = se ? se[p.s - 1] : null;
+    tracker.append(h("div", { class: "stepper" },
+      h("button", { class: "step", type: "button", "aria-label": "एक एपिसोड कम", disabled: p.s === 1 && p.e === 0, onclick: () => minusEp(id) }, icon("minus", 22)),
+      h("div", { class: "count" }, h("span", { class: "meta", text: seasonLabel(id, p.s) + ", एपिसोड" }),
+        h("b", null, String(p.e), total ? h("small", { text: " / " + total }) : null)),
+      h("button", { class: "step plus", type: "button", "aria-label": "एक एपिसोड और देखा", disabled: atEnd(id), onclick: () => plusEp(id) }, icon("plus", 22))));
+    if (total) tracker.append(h("div", { class: "bar thin" }, h("div", { style: "width:" + Math.round(p.e / total * 100) + "%" })));
+    tracker.append(h("button", { class: atEnd(id) ? "btn primary wide" : "btn wide", type: "button", onclick: () => finish(id) }, "पूरी सीरीज़ देख ली"));
+  } else {
+    const r = state.ratings[id];
+    tracker.append(h("p", { class: "meta", text: r ? "आपके अंक: " + r + " / 10" : "अभी अंक नहीं दिए।" }));
+    tracker.append(scoreButtons(r || 0, n => change(() => { state.ratings[id] = n; }, "अंक सेव हो गए")));
+    const note = h("input", { id: "detail-note", type: "text", value: state.notes[id] || "", placeholder: "एक लाइन में राय" });
+    note.addEventListener("change", () => { const v = note.value.trim(); if (v) state.notes[id] = v; else delete state.notes[id]; save(); snack("राय सेव हो गई", false); });
+    tracker.append(h("label", { class: "field", for: "detail-note" }, "एक लाइन में राय", note));
+    tracker.append(h("button", { class: "btn wide", type: "button", onclick: () => unfinish(id) }, "फिर से सूची में डालें"));
+  }
+  body.append(tracker);
+
+  // Characters
+  const charSec = h("section", { class: "col", style: "gap:10px" }, h("h2", { class: "section-title", text: "पसंदीदा किरदार" }));
+  const chips = h("div", { class: "chips" }, charChips(id, true));
+  if (ui.panel !== "char") chips.append(h("button", { class: "btn dashed", type: "button", style: "min-height:52px;border-radius:14px", onclick: () => { ui.panel = "char"; render(); setTimeout(() => { const f = document.getElementById("char-name"); if (f) f.focus(); }, 0); } }, "+ किरदार"));
+  charSec.append(chips);
+  if (ui.panel === "char") {
+    const nm = h("input", { id: "char-name", type: "text", autocomplete: "off", placeholder: "जैसे हार्वी" });
+    const tp = h("select", { id: "char-type" }, CHAR_TYPES.map((t, i) => h("option", { value: String(i), text: t })));
+    const err = h("p", { class: "err", text: "किरदार का नाम लिखिए।", hidden: true });
+    charSec.append(h("div", { class: "panel" },
+      h("div", { class: "grid2" }, h("label", { class: "field", for: "char-name" }, "नाम", nm), h("label", { class: "field", for: "char-type" }, "किस तरह का", tp)),
+      err,
+      h("div", { class: "actions" },
+        h("button", { class: "btn primary", type: "button", onclick: () => {
+          const n = nm.value.trim(); if (!n) { err.hidden = false; nm.focus(); return; }
+          ui.panel = null;
+          change(() => { state.chars[id] = (state.chars[id] || []).concat({ n, t: Number(tp.value) }); }, "“" + n + "” जुड़ गया");
+        } }, "जोड़ें"),
+        h("button", { class: "btn", type: "button", onclick: () => { ui.panel = null; render(); } }, "रद्द करें"))));
+  }
+  body.append(charSec);
+
+  // Scene notes
+  const scenes = state.scenes[id] || [];
+  const sceneSec = h("section", { class: "col", style: "gap:10px" },
+    h("div", { class: "split" }, h("h2", { class: "section-title", style: "color:var(--fg)", text: "सीन नोट्स" }),
+      ui.panel !== "scene" ? h("button", { class: "btn", type: "button", style: "min-height:36px", onclick: () => { ui.panel = "scene"; render(); setTimeout(() => { const f = document.getElementById("scene-text"); if (f) f.focus(); }, 0); } }, "+ नोट") : null));
+  if (ui.panel === "scene") {
+    const lb = h("input", { id: "scene-label", type: "text", autocomplete: "off", value: seasonLabel(id, p.s) + ", एपिसोड " + Math.max(1, p.e) });
+    const tx = h("textarea", { id: "scene-text", placeholder: "क्या देखना है? जैसे: मीटिंग वाले सीन में बॉडी लैंग्वेज" });
+    const err = h("p", { class: "err", text: "नोट लिखिए।", hidden: true });
+    sceneSec.append(h("div", { class: "panel" },
+      h("label", { class: "field", for: "scene-label" }, "कहाँ (सीज़न / एपिसोड)", lb),
+      h("label", { class: "field", for: "scene-text" }, "नोट", tx), err,
+      h("div", { class: "actions" },
+        h("button", { class: "btn primary", type: "button", onclick: () => {
+          const x = tx.value.trim(); if (!x) { err.hidden = false; tx.focus(); return; }
+          ui.panel = null;
+          change(() => { state.scenes[id] = [{ l: lb.value.trim(), x }].concat(state.scenes[id] || []); }, "नोट जुड़ गया");
+        } }, "जोड़ें"),
+        h("button", { class: "btn", type: "button", onclick: () => { ui.panel = null; render(); } }, "रद्द करें"))));
+  }
+  if (!scenes.length && ui.panel !== "scene") sceneSec.append(h("p", { class: "empty", text: "ऐसे सीन लिखिए जिन्हें दोबारा देखना हो: बॉडी लैंग्वेज, कोई दमदार डायलॉग या चाल।" }));
+  scenes.forEach((sc, i) => sceneSec.append(h("div", { class: "note" },
+    h("div", { class: "col", style: "flex:1;gap:2px" }, sc.l ? h("span", { class: "nl", text: sc.l }) : null, h("span", { class: "nt", text: sc.x })),
+    h("button", { class: "x", type: "button", "aria-label": "नोट हटाएँ", onclick: () => change(() => { state.scenes[id] = (state.scenes[id] || []).filter((_, j) => j !== i); }, "नोट हटाया") }, icon("x", 16)))));
+  body.append(sceneSec);
+
+  // Inline panels for the footer actions
+  if (ui.panel === "place") {
+    const sel = placeSelect("place-" + id, id, currentPlace(id));
+    body.append(h("section", { class: "panel" }, h("label", { class: "field", for: "place-" + id }, "कहाँ ले जाएँ", sel),
+      h("div", { class: "actions" },
+        h("button", { class: "btn primary", type: "button", onclick: () => { const t = sel.value; ui.panel = null; change(() => place(id, t), "जगह बदल दी"); } }, "ले जाएँ"),
+        h("button", { class: "btn", type: "button", onclick: () => { ui.panel = null; render(); } }, "रद्द करें"))));
+  }
+  if (ui.panel === "hindi") {
+    const sel = h("select", { id: "hindi-" + id }, ["ok", "likely", "check"].map(k => h("option", { value: k, text: H[k] })));
+    sel.value = hindiOf(id);
+    body.append(h("section", { class: "panel" }, h("label", { class: "field", for: "hindi-" + id }, "हिंदी की स्थिति", sel),
+      h("div", { class: "actions" },
+        h("button", { class: "btn primary", type: "button", onclick: () => { const v = sel.value; ui.panel = null; change(() => { if (v === b.hindi) delete state.hindi[id]; else state.hindi[id] = v; }, "हिंदी की स्थिति बदली"); } }, "सेव करें"),
+        h("button", { class: "btn", type: "button", onclick: () => { ui.panel = null; render(); } }, "रद्द करें"))));
+  }
+  if (ui.panel === "delete") {
+    body.append(h("section", { class: "panel" }, h("p", { style: "color:var(--danger)", text: "“" + b.name + "” को पूरी तरह हटाएँ?" }),
+      h("div", { class: "actions" },
+        h("button", { class: "btn danger", type: "button", style: "background:var(--danger);color:var(--bg);border:0", onclick: () => removeSeries(id) }, "हाँ, हटाएँ"),
+        h("button", { class: "btn", type: "button", onclick: () => { ui.panel = null; render(); } }, "नहीं"))));
+  }
+  el.replaceChildren(head, body);
+  const toggle = name => () => { ui.panel = ui.panel === name ? null : name; render(); const s = document.getElementById("scr-detail"); s.scrollTop = s.scrollHeight; };
+  acts.replaceChildren(
+    h("button", { class: "btn", type: "button", "aria-expanded": String(ui.panel === "place"), onclick: toggle("place") }, "जगह बदलें"),
+    h("button", { class: "btn", type: "button", "aria-expanded": String(ui.panel === "hindi"), onclick: toggle("hindi") }, "हिंदी बदलें"),
+    h("button", { class: "btn danger", type: "button", "aria-expanded": String(ui.panel === "delete"), onclick: toggle("delete") }, "हटाएँ"));
+  acts.hidden = false;
+}
+
+function renderAdd() {
+  const el = document.getElementById("scr-add");
+  const head = h("header", { class: "head small" },
+    h("button", { class: "icon-btn bare", type: "button", "aria-label": "वापस", onclick: back }, icon("back", 24)),
+    h("h1", { class: "title sm", text: "नई सीरीज़ जोड़ें" }));
+  const name = h("input", { id: "add-name", type: "text", autocomplete: "off", placeholder: "जैसे Billions" });
+  const where = h("input", { id: "add-where", type: "text", autocomplete: "off", placeholder: "जैसे Netflix" });
+  const sc = h("input", { id: "add-seasons", type: "number", inputmode: "numeric", min: "1", max: "40", placeholder: "जैसे 5" });
+  const ep = h("input", { id: "add-eps", type: "number", inputmode: "numeric", min: "1", max: "100", placeholder: "जैसे 10" });
+  const hi = h("select", { id: "add-hindi" }, ["ok", "likely", "check"].map(k => h("option", { value: k, text: H[k] })));
+  hi.value = "check";
+  const pl = placeSelect("add-place", null, lastMainPlace());
+  const why = h("textarea", { id: "add-why", placeholder: "एक लाइन, जैसे: हार्वी जैसा करिश्माई किरदार" });
+  const err = h("p", { class: "err", text: "सीरीज़ का नाम लिखिए।", hidden: true });
+  const form = h("form", { class: "body", novalidate: true },
+    h("label", { class: "field", for: "add-name" }, "सीरीज़ का नाम *", name), err,
+    h("label", { class: "field", for: "add-where" }, "कहाँ है", where),
+    h("div", { class: "grid2" }, h("label", { class: "field", for: "add-seasons" }, "कितने सीज़न", sc), h("label", { class: "field", for: "add-eps" }, "हर सीज़न में एपिसोड (लगभग)", ep)),
+    h("div", { class: "grid2" }, h("label", { class: "field", for: "add-hindi" }, "हिंदी", hi), h("label", { class: "field", for: "add-place" }, "कहाँ रखें", pl)),
+    h("label", { class: "field", for: "add-why" }, "क्यों देखनी है (चाहें तो)", why),
+    h("button", { class: "btn primary big", type: "submit", style: "font-size:17px;min-height:52px" }, "जोड़ें"));
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const n = name.value.trim();
+    if (!n) { err.hidden = false; name.focus(); return; }
+    const sCount = Math.min(40, Math.max(0, parseInt(sc.value, 10) || 0));
+    const eCount = Math.min(100, Math.max(0, parseInt(ep.value, 10) || 0));
+    const id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    const target = pl.value;
+    change(() => {
+      state.custom[id] = { name: n, where: where.value.trim(), hindi: hi.value, why: why.value.trim(),
+        seasons: sCount && eCount ? Array(sCount).fill(eCount) : null, epsText: sCount && !eCount ? sCount + " सीज़न" : "" };
+      place(id, target);
+    }, null);
+    tabGo("queue");
+    snack("“" + n + "” जुड़ गई", true);
+  });
+  el.replaceChildren(head, form);
+}
+
+function renderUpdateCard() {
+  const card = h("section", { class: "card", style: "border-radius:20px;padding:16px;gap:12px", "aria-label": "अपडेट" },
+    h("div", { class: "split" }, h("h2", { class: "section-title", style: "color:var(--fg)", text: "अपडेट" }), h("span", { class: "tag", text: "आपका संस्करण " + VERSION })));
+  if (!SHELL) {
+    card.append(h("p", { class: "meta", style: "font-size:14px", text: "यह इंटरनेट पर खुला संस्करण है, यह हमेशा सबसे नया रहता है।" }));
+    return card;
+  }
+  const last = parseInt(lsGet("wl-last-check") || "0", 10);
+  const line = (text, color) => h("p", { style: "font-size:14px;color:" + (color || "var(--muted)"), text });
+  const st = LIVE.status;
+  if (st === "checking") card.append(line("जाँच रहा हूँ…"));
+  else if (st === "latest") card.append(line("आपके पास सबसे नया संस्करण है।", "var(--ok)"));
+  else if (st === "ready") card.append(line("नया संस्करण " + readyName() + " तैयार है। अभी लगाइए, या ऐप अगली बार खोलेंगे तो अपने आप लग जाएगा।", "var(--ok)"),
+    h("button", { class: "btn primary big", type: "button", style: "font-size:16px;min-height:52px", onclick: applyUpdate }, icon("download", 20), "अभी लगाएँ"));
+  else if (st === "needApk") card.append(line("नए संस्करण " + ((LIVE.info && LIVE.info.version) || "") + " के लिए ऐप एक बार नए सिरे से इंस्टॉल करना होगा। पुराना ऐप हटाना नहीं है, आपकी सूची बनी रहेगी।", "var(--warn)"),
+    h("a", { class: "btn primary big", href: APK_URL, style: "font-size:16px;min-height:52px" }, icon("download", 20), "नया ऐप डाउनलोड करें"));
+  else if (st === "error") card.append(line(LIVE.msg, "var(--warn)"));
+  else card.append(line(last ? "आख़िरी जाँच: " + whenText(last) : "ऐप खुलते ही नया संस्करण अपने आप जाँचता है।"));
+  card.append(h("button", { class: "btn wide", type: "button", style: "min-height:48px", disabled: st === "checking", onclick: () => checkUpdate(true) }, "अभी अपडेट जाँचें"),
+    h("p", { class: "meta", style: "font-size:13px", text: "नया फ़ीचर Claude से चैट में माँगिए। वह उसे आपकी GitHub वाली जगह पर डाल देगा, और यह ऐप खुलते ही उसे ले लेगा। फ़ोन और टैब, दोनों में।" }));
+  return card;
+}
+
+function renderSettings() {
+  const el = document.getElementById("scr-settings");
+  const head = h("header", { class: "head small" },
+    h("button", { class: "icon-btn bare", type: "button", "aria-label": "वापस", onclick: back }, icon("back", 24)),
+    h("h1", { class: "title sm", text: "सेटिंग और बैकअप" }));
+  const body = h("main", { class: "body settings-grid", style: "gap:16px" });
+  const rem = mainRemaining();
+  body.append(h("section", { class: "card", style: "border-radius:20px;padding:16px;gap:12px" },
+    h("h2", { class: "section-title", text: "रोज़ कितने एपिसोड?" }),
+    h("div", { style: "display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px", role: "group", "aria-label": "रोज़ के एपिसोड" }, [1, 2, 3].map(n =>
+      h("button", { class: "fchip", style: "height:46px;border-radius:12px", type: "button", "aria-pressed": String(state.pace === n), onclick: () => change(() => { state.pace = n; }, null) }, n + " एपिसोड"))),
+    h("p", { class: "meta", style: "font-size:14px" }, rem + " एपिसोड बाकी। इस रफ़्तार से मुख्य सूची " + monthsText(rem, state.pace) + " में पूरी होगी।")));
+
+  body.append(renderUpdateCard());
+
+  const last = state.lastBackup ? new Date(state.lastBackup) : null;
+  const lastText = last ? "आख़िरी: " + last.getDate() + "/" + (last.getMonth() + 1) + "/" + last.getFullYear() : "अभी तक कभी नहीं";
+  const codeBox = h("textarea", { id: "backup-out", class: "code", readonly: true, rows: "4", "aria-label": "बैकअप कोड" });
+  const backupCard = h("section", { class: "card", style: "border-radius:20px;padding:16px;gap:12px" },
+    h("div", { class: "split" }, h("h2", { class: "section-title", style: "color:var(--fg)", text: "बैकअप" }), h("span", { class: "tag " + (last && !backupDue() ? "ok" : "check"), text: last && backupDue() ? lastText + " · पुराना" : lastText })),
+    h("p", { class: "meta", style: "font-size:14px", text: "फ़ोन बदले या ऐप हट जाए, तो यह कोड आपकी पूरी सूची, टिक, अंक और नोट्स वापस ले आएगा। कोड कॉपी करके WhatsApp पर ख़ुद को भेज दीजिए।" }),
+    h("p", { class: "meta", style: "font-size:13px", text: "फ़ोन और टैब की सूची अलग-अलग सेव होती है। एक की सूची दूसरे में लानी हो, तो यही कोड दूसरे में \"बैकअप से वापस लाएँ\" में चिपकाइए।" }),
+    h("button", { class: "btn primary big", type: "button", style: "font-size:16px;min-height:52px", onclick: () => {
+      state.lastBackup = Date.now(); save();
+      const code = backupCode();
+      ui.backupShown = code;
+      const done = ok => {
+        ui.copyMsg = ok ? "कोड कॉपी हो गया। अब WhatsApp पर ख़ुद को भेज दीजिए।" : "कोड नीचे है। उसे दबाकर रखिए, \"सब चुनें\" और फिर \"कॉपी\" कीजिए। या सीधे WhatsApp वाला बटन दबाइए।";
+        ui.copyOk = ok;
+        render();
+      };
+      // The old copy command works inside the app's WebView; the newer clipboard API is the fallback.
+      let ok = false;
+      const ta = document.createElement("textarea");
+      ta.value = code; ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0";
+      document.body.append(ta);
+      try { ta.select(); ta.setSelectionRange(0, code.length); ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      ta.remove();
+      if (ok) done(true);
+      else if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(() => done(true), () => done(false));
+      else done(false);
+    } }, icon("copy", 20), "बैकअप कोड कॉपी करें"));
+  if (ui.backupShown) {
+    codeBox.value = ui.backupShown;
+    backupCard.append(h("p", { style: "font-size:14px;color:" + (ui.copyOk ? "var(--ok)" : "var(--warn)"), text: ui.copyMsg }), codeBox,
+      h("a", { class: "btn wide", href: "whatsapp://send?text=" + encodeURIComponent(ui.backupShown), style: "min-height:48px" }, "WhatsApp पर भेजें"));
+  }
+  body.append(backupCard);
+
+  const input = h("textarea", { id: "restore-code", placeholder: "कोड यहाँ", style: "min-height:72px" });
+  input.value = ui.restoreDraft || "";
+  const restoreCard = h("section", { class: "card", style: "border-radius:20px;padding:16px;gap:12px" },
+    h("h2", { class: "section-title", text: "बैकअप से वापस लाएँ" }),
+    h("label", { class: "field", for: "restore-code" }, "सेव किया हुआ कोड यहाँ चिपकाइए", input));
+  if (ui.restoreConfirm) {
+    restoreCard.append(h("p", { style: "font-size:14px;color:var(--warn)", text: "इससे अभी का सारा डेटा कोड वाले डेटा से बदल जाएगा। पक्का?" }),
+      h("div", { class: "actions" },
+        h("button", { class: "btn primary", type: "button", onclick: () => {
+          const next = ui.restoreConfirm; ui.restoreConfirm = null; ui.restoreMsg = ""; ui.restoreDraft = "";
+          change(() => { state = next; }, "सूची वापस आ गई");
+        } }, "हाँ, वापस लाएँ"),
+        h("button", { class: "btn", type: "button", onclick: () => { ui.restoreConfirm = null; render(); } }, "नहीं")));
+  } else {
+    restoreCard.append(h("button", { class: "btn wide", type: "button", style: "min-height:48px", onclick: () => {
+      ui.restoreDraft = input.value;
+      const parsed = parseBackup(input.value);
+      if (!parsed) { ui.restoreMsg = "यह कोड सही नहीं लग रहा। पूरा कोड चिपकाइए, जो WL2: से शुरू होता है।"; render(); return; }
+      ui.restoreMsg = ""; ui.restoreConfirm = parsed; render();
+    } }, "सूची वापस लाएँ"));
+  }
+  if (ui.restoreMsg) restoreCard.append(h("p", { class: "err", text: ui.restoreMsg }));
+  body.append(restoreCard);
+
+  body.append(h("section", { class: "col span2", style: "gap:8px" },
+    h("button", { class: "btn dashed", type: "button", style: "min-height:48px;border-radius:14px", disabled: state.removed.length === 0, onclick: () => change(() => {
+      for (const id of state.removed) { const L = LISTS.find(x => DEFAULT_LAYOUT[x].includes(id)) || "main"; state.layout[L].push(id); }
+      state.removed = [];
+    }, "हटाई गई सीरीज़ वापस आ गईं") }, "हटाई गई सीरीज़ वापस लाएँ (" + state.removed.length + ")"),
+    h("p", { class: "meta", style: "text-align:center;font-size:12px", text: "संस्करण " + VERSION + " (" + BUILD + (SHELL ? ", ढाँचा " + SHELL : "") + ") · आपकी सूची इसी डिवाइस में सेव" })));
+  el.replaceChildren(head, body);
+}
+
+function renderTabs(active) {
+  const nav = document.getElementById("tabs");
+  // Phone: bottom bar only on the three tabs. Tablet: the rail stays on every screen.
+  nav.hidden = !isMedium() && !TABS.includes(screen);
+  const tab = (id, label, ic) => h("button", { class: "tab", type: "button", "aria-current": active === id ? "page" : null, onclick: () => tabGo(id) }, h("span", { class: "ind" }, icon(ic, 24)), label);
+  nav.replaceChildren(
+    h("button", { class: "fab", type: "button", "aria-label": "नई सीरीज़ जोड़ें", onclick: () => { if (screen !== "add") go("add"); } }, icon("plus", 26)),
+    tab("now", "अभी", "play"), tab("queue", "सूची", "list"), tab("finished", "देख लीं", "star"),
+    h("button", { class: "tab settings", type: "button", "aria-current": active === "settings" ? "page" : null, onclick: () => { if (screen !== "settings") go("settings"); } }, h("span", { class: "ind" + (backupDue() ? " has-dot" : "") }, icon("gear", 24)), "सेटिंग"));
+}
+
+function render() {
+  const two = isWide() && (screen === "queue" || screen === "finished" || screen === "detail");
+  const listTab = screen === "detail" ? (ui.detailFrom || "queue") : screen;
+  view.two = two; view.listTab = listTab;
+  view.paneId = two ? (screen === "detail" ? detailId : selFor(listTab)) : null;
+  const shown = two ? listTab : (screen === "detail" ? null : screen);
+  for (const s of ["now", "queue", "finished", "add", "settings"]) document.getElementById("scr-" + s).hidden = s !== shown;
+  const paneOn = two || screen === "detail";
+  document.getElementById("detail-pane").hidden = !paneOn;
+  document.getElementById("stage").classList.toggle("two", two);
+  if (shown === "now") renderNow();
+  else if (shown === "queue") renderQueue();
+  else if (shown === "finished") renderFinished();
+  else if (shown === "add") renderAdd();
+  else if (shown === "settings") renderSettings();
+  if (paneOn) renderDetail(two ? view.paneId : detailId, two);
+  else document.getElementById("detail-actions").hidden = true;
+  renderTabs(screen === "detail" ? (ui.detailFrom || "queue") : screen);
+  placeSnack();
+}
+// Re-draw only when the screen crosses a size step (turning the tablet), not when the keyboard opens.
+for (const m of [MQ_MEDIUM, MQ_WIDE]) {
+  if (m.addEventListener) m.addEventListener("change", () => render());
+  else if (m.addListener) m.addListener(() => render());
+}
+
+try { history.replaceState({ scr: "now" }, ""); } catch (e) {}
+save();
+render();
+// Reached the first screen: tell the starter page this version opens fine.
+try { localStorage.removeItem("wl-boot"); } catch (e) {}
+if (SHELL) setTimeout(() => checkUpdate(false), 1200);
+</script>
+</body>
+</html>

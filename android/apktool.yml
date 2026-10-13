@@ -1,0 +1,23 @@
+!!brut.androlib.meta.MetaInfo
+apkFileName: watchlist.apk
+compressionType: false
+doNotCompress:
+- arsc
+- png
+isFrameworkApk: false
+packageInfo:
+  forcedPackageId: '127'
+  renameManifestPackage: null
+sdkInfo:
+  minSdkVersion: '21'
+  targetSdkVersion: '34'
+sharedLibrary: false
+sparseResources: false
+usesFramework:
+  ids:
+  - 1
+  tag: null
+version: 2.10.0
+versionInfo:
+  versionCode: '5'
+  versionName: '3.0'

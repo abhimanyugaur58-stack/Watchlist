@@ -1,0 +1,5 @@
+dist/
+android/build/
+android/assets/app.html
+__pycache__/
+test-out/
