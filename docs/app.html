@@ -54,8 +54,34 @@ h1, h2, h3, p { margin: 0; }
 .card.tight { border-radius: 16px; padding: 14px; gap: 10px; }
 .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent); }
 .eyebrow.warn { color: var(--warn); }
-.tile { width: 64px; height: 88px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 34px; color: var(--fg); flex-shrink: 0; }
-.tile.big { width: 76px; height: 104px; border-radius: 14px; font-size: 40px; }
+.tile { width: 64px; height: 96px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 34px; color: var(--fg); flex-shrink: 0; }
+img.tile { display: block; object-fit: cover; background: var(--surface2); }
+.tile.big { width: 96px; height: 144px; border-radius: 14px; font-size: 44px; box-shadow: 0 12px 28px rgba(0, 0, 0, .45); }
+.tile.sm { width: 36px; height: 54px; border-radius: 7px; font-size: 17px; }
+#scr-detail { position: relative; isolation: isolate; }
+.hero { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; }
+/* The poster, blurred, behind the top of the detail screen; it fades into the page colour. */
+.hero-bg { position: absolute; top: 0; left: 0; right: 0; height: 380px; z-index: -1; overflow: hidden; pointer-events: none; }
+.hero-bg::before { content: ""; position: absolute; inset: -40px; background-image: var(--poster, none); background-size: cover; background-position: center 30%; filter: blur(26px) saturate(1.2); opacity: .6; }
+.hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0%, var(--bg) 100%); }
+.poster-btn { position: relative; flex-shrink: 0; padding: 0; border: 0; background: none; border-radius: 14px; }
+.poster-btn .edit { position: absolute; right: -6px; bottom: -6px; width: 30px; height: 30px; border-radius: 15px; display: flex; align-items: center; justify-content: center; background: var(--surface2); color: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
+.searchrow { display: flex; gap: 8px; align-items: flex-end; }
+.picks { display: flex; flex-direction: column; gap: 8px; }
+.pick { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); text-align: left; }
+.pick img, .pick-noimg { width: 44px; height: 66px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.pick-cta { font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.diary.diary-row { flex-direction: row; gap: 12px; align-items: flex-start; }
+.empty-art { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 12px; color: var(--dim); text-align: center; }
+.seal { flex-shrink: 0; }
+.seal.outline { color: var(--dim); }
+.seal-overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(5, 9, 18, .74); transition: opacity .35s; }
+.seal-overlay.out { opacity: 0; }
+.seal-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 24px; text-align: center; animation: stamp .6s cubic-bezier(.2, .9, .3, 1.25) both; }
+.seal-title { font-family: var(--font-display); font-weight: 700; font-size: 30px; color: var(--accent); margin-top: 8px; }
+.seal-name { font-size: 16px; color: var(--fg); }
+@keyframes stamp { 0% { transform: scale(1.8) rotate(-16deg); opacity: 0; } 60% { transform: scale(.94) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .seal-wrap { animation: none; } .seal-overlay { transition: none; } }
 .row { display: flex; gap: 14px; align-items: center; }
 .col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .name-lg { font-size: 24px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; background: none; border: 0; padding: 0; text-align: left; color: var(--fg); }
@@ -82,7 +108,7 @@ h1, h2, h3, p { margin: 0; }
 .qrow.done .qname { text-decoration: line-through; color: var(--muted); }
 .qnum { width: 32px; height: 32px; flex-shrink: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--surface2); color: var(--accent); }
 .qrow.current .qnum { background: var(--primary); color: var(--on-primary); }
-.qrow.done .qnum { background: var(--ok-bg); color: var(--ok); }
+.qrow.done .qnum { background: none; }
 .qname { font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
 .qmeta { font-size: 12px; color: var(--muted); }
 .pill { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: var(--accent-bg); color: var(--accent); white-space: nowrap; }
@@ -256,16 +282,27 @@ const CHAR_TYPES = ["धूसर नायक", "सब संभालने �
 const TILE_COLORS = ["#2D4A80", "#4B3A73", "#2C5E58", "#6E4C2C", "#3C5577", "#6E3448", "#55602F"];
 const KEY = "abhimanyu-watchlist-v2";
 const OLD_KEY = "abhimanyu-watchlist-done";
-const VERSION = "3.1";
+const VERSION = "3.2";
 // BUILD goes up by one on every live update; docs/version.json must carry the same number.
-const BUILD = 31;
+const BUILD = 32;
 // Which Android shell is running this page: the starter page sets it; 0 means a plain browser.
 const SHELL = (window.WL_SHELL | 0) || (parseInt(new URLSearchParams(location.search).get("shell"), 10) || 0);
 const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
+// Posters come from TVmaze (free, no key, CC BY-SA; credited in settings). Ids are fixed by hand so a remake
+// with the same name (Suits LA, the 1990 House of Cards) is never picked.
+const TV_API = "https://api.tvmaze.com/";
+const TV_IDS = { suits: 172, hoc: 175, crown: 3594, diplomat: 60213, succession: 23470, narcos: 2705, lincoln: 52910, vikings: 29,
+  moneyheist: 27436, guinness: 75496, hotd: 44778, gentlemen: 64992, billions: 3606, bcs: 618, narcosmx: 37787, designated: 8167, ozark: 13417 };
+const TV_BY_NAME = { "peaky blinders": 269, "game of thrones": 82, "breaking bad": 169, "better call saul": 618 };
 // The newest APK always sits next to the page, so this link never changes.
 const APK_URL = LIVE_BASE + "watchlist.apk";
 // Shown once in the "क्या नया है" card after the update arrives.
 const CHANGES = {
+  32: [
+    "असली पोस्टर: हर सीरीज़ का पोस्टर दिखेगा। एक बार आ जाने के बाद बिना इंटरनेट के भी दिखेगा।",
+    "पोस्टर ग़लत लगे या अपनी जोड़ी सीरीज़ का पोस्टर चुनना हो, तो सीरीज़ खोलकर उसके पोस्टर पर दबाइए।",
+    "सीरीज़ पूरी होने पर अब पीतल की मुहर लगती है।"
+  ],
   31: [
     "नए रंग: गहरा नीला और पीतल जैसा सुनहरा। बड़े बटन, प्रगति की पट्टी और अंक अब सुनहरे दिखते हैं।",
     "जिन चीज़ों पर ध्यान देना है, जैसे \"हिंदी जाँचें\" और बैकअप का बिंदु, वे अब नारंगी हैं।"
@@ -310,6 +347,8 @@ function loadState(s) {
   s.ratings = obj(s.ratings);
   s.notes = obj(s.notes);
   s.chars = obj(s.chars);
+  s.tv = obj(s.tv); // series id -> TVmaze show id chosen by hand; 0 = no poster
+  for (const k of Object.keys(s.tv)) if (!(Number.isInteger(s.tv[k]) && s.tv[k] >= 0)) delete s.tv[k];
   s.scenes = obj(s.scenes);
   s.finishedOrder = Array.isArray(s.finishedOrder) ? s.finishedOrder : [];
   s.pace = [1, 2, 3].includes(s.pace) ? s.pace : 1;
@@ -431,6 +470,7 @@ function finish(id) {
   ui.draftScore = 0;
   ui.sel.finished = id;
   tabGo("finished");
+  showSeal(base(id).name);
   snack("“" + base(id).name + "” पूरी! अब अंक दीजिए", true);
 }
 function unfinish(id) {
@@ -465,7 +505,7 @@ function removeSeries(id) {
     state.done = state.done.filter(x => x !== id);
     state.finishedOrder = state.finishedOrder.filter(x => x !== id);
     if (CATALOG[id]) { if (!state.removed.includes(id)) state.removed.push(id); }
-    else delete state.custom[id];
+    else { delete state.custom[id]; delete state.tv[id]; }
   }, null);
   ui.panel = null;
   // Side-by-side view: the list stays, the next series fills the right side. Otherwise step back a screen.
@@ -534,12 +574,172 @@ function readyName() { return (LIVE.info && LIVE.info.version) || lsGet("wl-code
 function backupDue() { return !state.lastBackup || Date.now() - state.lastBackup > 15 * 864e5; }
 function whenText(ms) { const d = new Date(ms); return d.getDate() + "/" + (d.getMonth() + 1) + " " + d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0"); }
 
+/* ---------- Posters ----------
+   Each poster is fetched once, shrunk, and kept in this device's storage, so it shows without internet afterwards.
+   Posters are not part of the backup code; they come back by themselves on a new device. */
+const posterMem = new Map();
+const posterFailed = new Set();
+const noMatch = new Set();
+let postersBusy = false;
+function tvIdOf(id) {
+  if (Object.prototype.hasOwnProperty.call(state.tv, id)) return state.tv[id];
+  if (TV_IDS[id]) return TV_IDS[id];
+  const b = base(id);
+  const known = b && TV_BY_NAME[b.name.trim().toLowerCase()];
+  return known || null;
+}
+function posterData(id) {
+  const tv = tvIdOf(id);
+  if (!tv) return null;
+  if (!posterMem.has(tv)) posterMem.set(tv, lsGet("wl-poster:" + tv));
+  return posterMem.get(tv);
+}
+function shrinkImage(blob) {
+  const raw = () => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob); });
+  if (!window.createImageBitmap) return raw();
+  return createImageBitmap(blob).then(bmp => {
+    const w = Math.min(240, bmp.width), hgt = Math.round(bmp.height * w / bmp.width);
+    const c = document.createElement("canvas"); c.width = w; c.height = hgt;
+    c.getContext("2d").drawImage(bmp, 0, 0, w, hgt);
+    return c.toDataURL("image/jpeg", 0.82);
+  }).catch(raw);
+}
+async function loadPoster(tv, imgUrl) {
+  if (!tv || posterFailed.has(tv)) return false;
+  if (lsGet("wl-poster:" + tv)) return true;
+  try {
+    if (!imgUrl) {
+      const r = await fetch(TV_API + "shows/" + tv);
+      if (!r.ok) throw new Error("http " + r.status);
+      const j = await r.json();
+      imgUrl = j && j.image && (j.image.medium || j.image.original);
+      if (!imgUrl) { posterFailed.add(tv); return false; }
+    }
+    const r2 = await fetch(String(imgUrl).replace(/^http:/, "https:"));
+    if (!r2.ok) throw new Error("http " + r2.status);
+    const data = await shrinkImage(await r2.blob());
+    if (typeof data !== "string" || !data.startsWith("data:image") || !lsSet("wl-poster:" + tv, data)) { posterFailed.add(tv); return false; }
+    posterMem.set(tv, data);
+    return true;
+  } catch (e) { posterFailed.add(tv); return false; }
+}
+// A series you added yourself gets a poster only when TVmaze has a show with exactly the same name.
+async function autoMatch(id) {
+  const b = base(id);
+  if (!b || !state.custom[id] || noMatch.has(id)) return null;
+  const name = b.name.trim().toLowerCase();
+  try {
+    const r = await fetch(TV_API + "search/shows?q=" + encodeURIComponent(b.name.trim()));
+    if (!r.ok) throw new Error("http " + r.status);
+    const hit = (await r.json()).map(x => x && x.show).find(sh => sh && sh.name && sh.name.trim().toLowerCase() === name);
+    if (!hit) { noMatch.add(id); return null; }
+    return { tv: hit.id, img: hit.image && (hit.image.medium || hit.image.original) };
+  } catch (e) { noMatch.add(id); return null; }
+}
+function refreshPosters(id) {
+  const data = posterData(id);
+  document.querySelectorAll('[data-series="' + id + '"]').forEach(el => el.replaceWith(tile(id, el.getAttribute("data-size") || "")));
+  document.querySelectorAll('[data-hero="' + id + '"]').forEach(el => { if (data) el.style.setProperty("--poster", "url(" + data + ")"); });
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function fetchPosters() {
+  if (postersBusy) return;
+  postersBusy = true;
+  try {
+    const ids = [].concat(state.layout.main, state.layout.break, state.layout.maybe, state.layout.archive);
+    for (const id of ids) {
+      if (!base(id)) continue;
+      let tv = tvIdOf(id), img = null;
+      if (tv === 0) continue;
+      if (tv == null) {
+        const m = await autoMatch(id);
+        if (!m) continue;
+        tv = m.tv; img = m.img;
+        state.tv[id] = tv; save();
+      }
+      if (lsGet("wl-poster:" + tv) || posterFailed.has(tv)) continue;
+      if (await loadPoster(tv, img)) refreshPosters(id);
+      await sleep(350); // TVmaze allows about 20 calls in 10 seconds
+    }
+  } finally { postersBusy = false; }
+}
+async function posterSearch(id, q) {
+  q = (q || "").trim();
+  ui.posterQ = q;
+  if (!q) return;
+  ui.posterMsg = "ढूँढ रहा हूँ…"; ui.posterResults = [];
+  render();
+  try {
+    const r = await fetch(TV_API + "search/shows?q=" + encodeURIComponent(q));
+    if (!r.ok) throw new Error("http " + r.status);
+    ui.posterResults = (await r.json()).map(x => x && x.show).filter(Boolean).slice(0, 6).map(sh => ({
+      tv: sh.id, name: sh.name || "", year: (sh.premiered || "").slice(0, 4),
+      net: (sh.network && sh.network.name) || (sh.webChannel && sh.webChannel.name) || "",
+      img: sh.image && (sh.image.medium || sh.image.original)
+    }));
+    ui.posterMsg = ui.posterResults.length ? "" : "इस नाम से कुछ नहीं मिला। सीरीज़ का अंग्रेज़ी नाम लिखकर देखिए।";
+  } catch (e) {
+    ui.posterMsg = "अभी पोस्टर नहीं ढूँढ पाया। इंटरनेट चालू करके फिर कोशिश कीजिए।";
+  }
+  if (ui.panel === "poster") render();
+}
+function openPicker(id) {
+  if (ui.panel === "poster") { ui.panel = null; render(); return; }
+  ui.panel = "poster"; ui.posterResults = []; ui.posterMsg = "";
+  posterSearch(id, base(id).name.replace(/\s*\+.*$/, ""));
+}
+function choosePoster(id, pick) {
+  ui.panel = null; ui.posterResults = []; ui.posterMsg = ""; ui.posterQ = null;
+  change(() => { state.tv[id] = pick ? pick.tv : 0; }, pick ? "पोस्टर बदल दिया" : "पोस्टर हटा दिया");
+  if (pick) loadPoster(pick.tv, pick.img).then(ok => { if (ok) refreshPosters(id); });
+}
+function resetPoster(id) {
+  ui.panel = null;
+  change(() => { delete state.tv[id]; }, "ऐप वाला पोस्टर वापस");
+  fetchPosters();
+}
+
+/* ---------- The brass seal ---------- */
+let sealCount = 0;
+function sealSvg(size, outline) {
+  const s = document.createElementNS(SVG_NS, "svg");
+  s.setAttribute("width", size); s.setAttribute("height", size); s.setAttribute("viewBox", "0 0 100 100");
+  s.setAttribute("aria-hidden", "true"); s.setAttribute("class", "seal" + (outline ? " outline" : ""));
+  const el = (tag, attrs) => { const n = document.createElementNS(SVG_NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); s.append(n); return n; };
+  let d = "";
+  for (let i = 0; i < 56; i++) { const a = Math.PI * i / 28, r = i % 2 ? 44.5 : 49; d += (i ? "L" : "M") + (50 + r * Math.cos(a)).toFixed(2) + " " + (50 + r * Math.sin(a)).toFixed(2); }
+  const ink = outline ? "stroke:currentColor" : "stroke:var(--on-primary)";
+  if (outline) {
+    el("path", { d: d + "Z", fill: "none", style: "stroke:currentColor", "stroke-width": "2", "stroke-linejoin": "round" });
+  } else {
+    const id = "sealg" + (++sealCount);
+    const defs = el("defs", {});
+    const g = document.createElementNS(SVG_NS, "linearGradient");
+    g.setAttribute("id", id); g.setAttribute("x1", "0"); g.setAttribute("y1", "0"); g.setAttribute("x2", "1"); g.setAttribute("y2", "1");
+    [["0", "#F5DC9C"], ["0.5", "#D4A64A"], ["1", "#9C6E1E"]].forEach(([o, c]) => { const st = document.createElementNS(SVG_NS, "stop"); st.setAttribute("offset", o); st.setAttribute("stop-color", c); g.append(st); });
+    defs.append(g);
+    el("path", { d: d + "Z", fill: "url(#" + id + ")" });
+  }
+  el("circle", { cx: "50", cy: "50", r: "35", fill: "none", style: ink, "stroke-width": "2.2", opacity: outline ? "1" : ".6" });
+  el("circle", { cx: "50", cy: "50", r: "30", fill: "none", style: ink, "stroke-width": "1", opacity: outline ? "1" : ".45" });
+  el("path", { d: "M36 51 L46 61 L65 40", fill: "none", style: ink, "stroke-width": outline ? "4" : "6.5", "stroke-linecap": "round", "stroke-linejoin": "round" });
+  return s;
+}
+function showSeal(name) {
+  const ov = h("div", { class: "seal-overlay", role: "status", "aria-live": "polite" },
+    h("div", { class: "seal-wrap" }, sealSvg(176), h("p", { class: "seal-title", text: "पूरी हुई" }), h("p", { class: "seal-name", text: name })));
+  const close = () => { ov.classList.add("out"); setTimeout(() => ov.remove(), 350); };
+  ov.addEventListener("click", close);
+  document.body.append(ov);
+  setTimeout(close, 2300);
+}
+
 /* ---------- Navigation ---------- */
 let screen = "now";
 let detailId = null;
 let filter = "all";
 const ui = { panel: null, draftScore: 0, restoreMsg: "", restoreConfirm: null, backupShown: "", copyMsg: "", copyOk: false, restoreDraft: "",
-  sel: { queue: null, finished: null }, detailFrom: "queue" };
+  sel: { queue: null, finished: null }, detailFrom: "queue", posterQ: null, posterResults: [], posterMsg: "" };
 // What the last render showed: side by side or not, which list, which series on the right.
 const view = { two: false, listTab: "now", paneId: null };
 function finishedIds() { return state.finishedOrder.filter(id => isDone(id) && base(id)); }
@@ -627,7 +827,7 @@ const ICONS = {
   list: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
   star: "M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z",
   play: "M10 8.5l5 3.5-5 3.5z", x: "M6 6l12 12M18 6L6 18",
-  cal: "M3 10h18M8 3v4M16 3v4", download: "M12 4v11M7 10l5 5 5-5M5 20h14", copy: "M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1",
+  cal: "M3 10h18M8 3v4M16 3v4", download: "M12 4v11M7 10l5 5 5-5M5 20h14", edit: "M4 20h4L18.5 9.5a2.1 2.1 0 0 0-4-4L4 16v4zM13.5 6.5l4 4", copy: "M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1",
   gear: "M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
 };
 function icon(name, size, stroke) {
@@ -641,7 +841,13 @@ function icon(name, size, stroke) {
   const p = document.createElementNS(SVG_NS, "path"); p.setAttribute("d", ICONS[name]); s.append(p);
   return s;
 }
-function tile(id, big) { return h("div", { class: "tile" + (big ? " big" : ""), style: "background:" + tileColor(id), "aria-hidden": "true" }, initial(base(id).name)); }
+// The poster when this device has it, otherwise a coloured tile with the first letter. size: "", "big" or "sm".
+function tile(id, size) {
+  const cls = "tile" + (size ? " " + size : "");
+  const data = posterData(id);
+  if (data) return h("img", { class: cls + " poster", src: data, alt: "", "data-series": id, "data-size": size || "" });
+  return h("div", { class: cls, style: "background:" + tileColor(id), "aria-hidden": "true", "data-series": id, "data-size": size || "" }, initial(base(id).name));
+}
 function hindiSpan(id) { return h("span", { class: "h-" + hindiOf(id), text: hindiText(id) }); }
 function placeSelect(selectId, excludeId, selected) {
   const sel = h("select", { id: selectId });
@@ -710,6 +916,7 @@ function renderNow() {
     h("button", { class: "btn primary", type: "button", onclick: applyUpdate }, "अभी लगाएँ")));
   if (!cur) {
     body.append(h("section", { class: "card" },
+      h("span", { style: "display:flex" }, sealSvg(88)),
       h("span", { class: "eyebrow", text: "मुख्य सूची पूरी" }),
       h("h2", { class: "title sm", text: "सब देख लीं!" }),
       h("p", { class: "meta", text: "नई सीरीज़ जोड़िए, या \"हिंदी मिले तो देखें\" वाली सूची से कोई मुख्य क्रम में लाइए।" }),
@@ -747,6 +954,7 @@ function renderNow() {
         const num = String(state.layout.main.indexOf(id) + 1).padStart(2, "0");
         sec.append(h("button", { class: "upnext", type: "button", onclick: () => openDetail(id) },
           h("span", { class: "upnum", text: num }),
+          tile(id, "sm"),
           h("span", { class: "col", style: "gap:2px;flex:1" }, h("span", { style: "font-size:16px;font-weight:700", text: base(id).name }), h("span", { class: "meta", text: base(id).where + " · " + sizeText(id) })),
           h("span", { class: "chev" }, icon("chev", 18))));
       }
@@ -767,7 +975,8 @@ function queueRow(id, label, cur) {
   if (!done) metaBits.push(id === cur && rem != null ? rem + " एपिसोड बाकी" : sizeText(id));
   const sel = view.two && id === view.paneId;
   return h("button", { class: "qrow" + (id === cur ? " current" : "") + (done ? " done" : "") + (sel ? " sel" : ""), type: "button", "aria-current": sel ? "true" : null, onclick: () => openDetail(id) },
-    h("span", { class: "qnum", text: done ? "✓" : label }),
+    h("span", { class: "qnum", "aria-label": done ? "पूरी" : null }, done ? sealSvg(28) : label),
+    tile(id, "sm"),
     h("span", { class: "col", style: "gap:1px;flex:1" },
       h("span", { class: "qname", text: base(id).name }),
       h("span", { class: "qmeta" }, metaBits.filter(Boolean).join(" · ") + " · ", hindiSpan(id))),
@@ -837,16 +1046,16 @@ function renderFinished() {
       } }, "सेव करें")));
   }
   const diary = h("section", { class: "col", style: "gap:10px" }, h("h2", { class: "section-label", text: "आपकी डायरी" }));
-  if (!ids.length) diary.append(h("p", { class: "empty", text: "सीरीज़ पूरी होते ही यहाँ उसकी डायरी बनेगी।" }));
+  if (!ids.length) diary.append(h("div", { class: "empty-art" }, sealSvg(84, true), h("p", { class: "empty", text: "सीरीज़ पूरी होते ही यहाँ उसकी मुहर लगेगी और डायरी बनेगी।" })));
   for (const id of ids) {
     const r = state.ratings[id];
-    diary.append(h("article", { class: "diary" + (view.two && id === view.paneId ? " sel" : "") },
+    diary.append(h("article", { class: "diary diary-row" + (view.two && id === view.paneId ? " sel" : "") }, tile(id, "sm"), h("div", { class: "col", style: "flex:1;gap:8px" },
       h("div", { class: "diary-head" },
         h("button", { class: "diary-name", type: "button", onclick: () => openDetail(id) }, base(id).name),
         r ? h("span", { class: "rating", text: r + " / 10" }) : h("span", { class: "rating", style: "font-weight:400;font-size:13px", text: "अंक बाकी" })),
       sizeText(id) ? h("span", { class: "meta", text: sizeText(id) }) : null,
       state.notes[id] ? h("p", { class: "quote", text: "“" + state.notes[id] + "”" }) : null,
-      (state.chars[id] || []).length ? h("div", { class: "chips" }, (state.chars[id] || []).map(c => h("span", { class: "tag", text: c.n + " · " + (CHAR_TYPES[c.t] || "") }))) : null));
+      (state.chars[id] || []).length ? h("div", { class: "chips" }, (state.chars[id] || []).map(c => h("span", { class: "tag", text: c.n + " · " + (CHAR_TYPES[c.t] || "") }))) : null)));
   }
   body.append(diary);
   el.replaceChildren(head, body);
@@ -873,9 +1082,33 @@ function renderDetail(id, inPane) {
   if (b.where) tags.append(h("span", { class: "tag", text: b.where }));
   if (sizeText(id)) tags.append(h("span", { class: "tag", text: sizeText(id) }));
   tags.append(h("span", { class: "tag " + hindiOf(id), text: hindiText(id) }));
-  body.append(h("section", { class: "row", style: "align-items:flex-start" }, tile(id, true),
-    h("div", { class: "col", style: "gap:8px" }, h("h1", { class: "title", style: "font-size:28px;overflow-wrap:anywhere", text: b.name }), tags,
-      b.why ? h("p", { class: "meta", style: "font-size:14px", text: b.why }) : null)));
+  const heroData = posterData(id);
+  const backdrop = h("div", { class: "hero-bg", "data-hero": id, "aria-hidden": "true", style: heroData ? "--poster:url(" + heroData + ")" : null });
+  body.append(h("section", { class: "hero" },
+    h("div", { class: "row", style: "align-items:flex-end;gap:16px" },
+      h("button", { class: "poster-btn", type: "button", "aria-label": "पोस्टर बदलें", "aria-expanded": String(ui.panel === "poster"), onclick: () => openPicker(id) },
+        tile(id, "big"), h("span", { class: "edit" }, icon("edit", 16))),
+      h("div", { class: "col", style: "gap:8px" }, h("h1", { class: "title", style: "font-size:28px;overflow-wrap:anywhere", text: b.name }), tags)),
+    b.why ? h("p", { class: "meta", style: "font-size:14px", text: b.why }) : null));
+  if (ui.panel === "poster") {
+    const q = h("input", { id: "poster-q", type: "search", autocomplete: "off", value: ui.posterQ != null ? ui.posterQ : b.name });
+    const find = () => posterSearch(id, q.value);
+    q.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); find(); } });
+    const picks = h("div", { class: "picks" }, ui.posterResults.map(r => h("button", { class: "pick", type: "button", onclick: () => choosePoster(id, r) },
+      r.img ? h("img", { src: r.img, alt: "", loading: "lazy" }) : h("span", { class: "pick-noimg", "aria-hidden": "true" }, "?"),
+      h("span", { class: "col", style: "gap:2px;flex:1" }, h("b", { text: r.name }), h("span", { class: "meta", text: [r.year, r.net].filter(Boolean).join(" · ") })),
+      h("span", { class: "pick-cta", text: "यही है" }))));
+    body.append(h("section", { class: "panel", "aria-label": "पोस्टर चुनें" },
+      h("h2", { class: "section-title", text: "सही पोस्टर चुनिए" }),
+      h("div", { class: "searchrow" }, h("label", { class: "field", for: "poster-q", style: "flex:1" }, "सीरीज़ का नाम (अंग्रेज़ी में)", q),
+        h("button", { class: "btn primary", type: "button", onclick: find }, "ढूँढें")),
+      ui.posterMsg ? h("p", { class: "meta", style: "font-size:14px", text: ui.posterMsg }) : null,
+      picks,
+      h("div", { class: "actions" },
+        Object.prototype.hasOwnProperty.call(state.tv, id) && (TV_IDS[id] || TV_BY_NAME[b.name.trim().toLowerCase()]) ? h("button", { class: "btn", type: "button", onclick: () => resetPoster(id) }, "ऐप वाला पोस्टर") : null,
+        h("button", { class: "btn", type: "button", onclick: () => choosePoster(id, null) }, "पोस्टर नहीं चाहिए"),
+        h("button", { class: "btn", type: "button", onclick: () => { ui.panel = null; render(); } }, "बंद करें"))));
+  }
 
   // Episode tracker
   const tracker = h("section", { class: "card", style: "border-radius:20px;padding:16px", "aria-label": "एपिसोड ट्रैकर" }, h("h2", { class: "section-title", text: done ? "पूरी देख ली ✓" : "कहाँ तक पहुँचे" }));
@@ -980,7 +1213,7 @@ function renderDetail(id, inPane) {
         h("button", { class: "btn danger", type: "button", style: "background:var(--danger);color:var(--bg);border:0", onclick: () => removeSeries(id) }, "हाँ, हटाएँ"),
         h("button", { class: "btn", type: "button", onclick: () => { ui.panel = null; render(); } }, "नहीं"))));
   }
-  el.replaceChildren(head, body);
+  el.replaceChildren(backdrop, head, body);
   const toggle = name => () => { ui.panel = ui.panel === name ? null : name; render(); const s = document.getElementById("scr-detail"); s.scrollTop = s.scrollHeight; };
   acts.replaceChildren(
     h("button", { class: "btn", type: "button", "aria-expanded": String(ui.panel === "place"), onclick: toggle("place") }, "जगह बदलें"),
@@ -1025,6 +1258,7 @@ function renderAdd() {
     }, null);
     tabGo("queue");
     snack("“" + n + "” जुड़ गई", true);
+    setTimeout(fetchPosters, 300);
   });
   el.replaceChildren(head, form);
 }
@@ -1113,6 +1347,7 @@ function renderSettings() {
         h("button", { class: "btn primary", type: "button", onclick: () => {
           const next = ui.restoreConfirm; ui.restoreConfirm = null; ui.restoreMsg = ""; ui.restoreDraft = "";
           change(() => { state = next; }, "सूची वापस आ गई");
+          setTimeout(fetchPosters, 300);
         } }, "हाँ, वापस लाएँ"),
         h("button", { class: "btn", type: "button", onclick: () => { ui.restoreConfirm = null; render(); } }, "नहीं")));
   } else {
@@ -1131,7 +1366,8 @@ function renderSettings() {
       for (const id of state.removed) { const L = LISTS.find(x => DEFAULT_LAYOUT[x].includes(id)) || "main"; state.layout[L].push(id); }
       state.removed = [];
     }, "हटाई गई सीरीज़ वापस आ गईं") }, "हटाई गई सीरीज़ वापस लाएँ (" + state.removed.length + ")"),
-    h("p", { class: "meta", style: "text-align:center;font-size:12px", text: "संस्करण " + VERSION + " (" + BUILD + (SHELL ? ", ढाँचा " + SHELL : "") + ") · आपकी सूची इसी डिवाइस में सेव" })));
+    h("p", { class: "meta", style: "text-align:center;font-size:12px", text: "संस्करण " + VERSION + " (" + BUILD + (SHELL ? ", ढाँचा " + SHELL : "") + ") · आपकी सूची इसी डिवाइस में सेव" }),
+    h("p", { class: "meta", style: "text-align:center;font-size:12px" }, "पोस्टर और सीरीज़ की जानकारी: ", h("a", { href: "https://www.tvmaze.com", style: "color:var(--accent)" }, "TVmaze"), " (CC BY-SA)")));
   el.replaceChildren(head, body);
 }
 
@@ -1178,6 +1414,7 @@ render();
 // Reached the first screen: tell the starter page this version opens fine.
 try { localStorage.removeItem("wl-boot"); } catch (e) {}
 if (SHELL) setTimeout(() => checkUpdate(false), 1200);
+setTimeout(fetchPosters, SHELL ? 2500 : 600);
 </script>
 </body>
 </html>

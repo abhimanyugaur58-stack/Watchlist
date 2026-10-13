@@ -13,6 +13,7 @@ The owner is Abhimanyu. He speaks Hindi and does not read English, usually write
   - A downloaded page that never reaches its first screen (`wl-boot` still set on the next start) is dropped and marked `wl-bad-v`.
   - `Client.smali` keeps `file:` pages inside the WebView and opens every other link (WhatsApp, GitHub, Drive) in its own app.
 - `app.html` checks `docs/version.json` about 1 s after it opens. If `build` is higher than its own `BUILD`, and `minShell` is at most the running shell (`window.WL_SHELL`), it downloads `docs/app.html`, checks that it compiles, stores it, and shows "अभी लगाएँ". It also loads on the next start.
+- Posters come from TVmaze (free, no key, CC BY-SA; credited in settings). Built-in series use fixed ids in `TV_IDS` (picked by hand: "Suits" alone has five shows on TVmaze). Series he adds himself are matched only on an exact name, and he can pick another poster by tapping the poster on the detail screen; choices live in `state.tv` (0 = no poster). Images are shrunk and stored in localStorage as `wl-poster:<tvmaze id>`. They are not part of the backup code.
 - All user data stays on the device in localStorage under the key `abhimanyu-watchlist-v2`. Phone and tablet are separate. The backup code (`WL2:` + base64 JSON) moves data between them.
 - The repo is public. Never commit personal data such as his notes or real progress. Test fixtures use made-up values.
 
@@ -46,7 +47,7 @@ Only for shell changes: permissions, icon, app name, or native code in `smali/`.
 
 - Claude can push to `main`, but cannot call the Pages settings API or create releases. Changing those settings is a job for Abhimanyu in the GitHub website.
 - GitHub Pages is on: branch `main`, folder `/docs` (set by Abhimanyu on 13 Oct 2026).
-- The session shell got 403 for github.io; the web-fetch tool could read it.
+- The session shell got 403 for github.io and TVmaze; the web-fetch tool could read both. Tests fake TVmaze (`tests/common.py`, `FakeTVmaze`) with plain stand-in posters.
 
 ## Agreed next update (asked for on 13 Oct 2026, not started)
 
@@ -65,3 +66,5 @@ Before building, show him two or three options for each (a picture of the icon a
 - 1.0 / 1.1: simple list. 2.0: five-screen design (अभी, सूची, देख लीं, विवरण, सेटिंग). 2.1: tablet layout.
 - 3.0 (shell 3, versionCode 5): live updates, "क्या नया है", backup reminder dot.
 - 3.1 (live, build 31): navy-and-brass colours.
+- 3.2 (live, build 32): real posters, blurred poster backdrop on the detail screen, poster picker, brass seal when a series is finished, seal art for empty screens.
+- Agreed later steps for graphics: chess-piece emblems for the five character types, then a weekly-episodes chart. That chart needs a watch log with dates, and must have no streaks.

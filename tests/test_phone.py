@@ -1,12 +1,13 @@
 import json, sys
 from playwright.sync_api import sync_playwright
-from common import APP_URL as URL, OUT, VERSION, load_fixture, Checker
+from common import APP_URL as URL, OUT, VERSION, load_fixture, Checker, FakeTVmaze
 SHOTS = str(OUT) + "/"
 check = Checker()
 
 with sync_playwright() as p:
     b = p.chromium.launch()
     ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
+    FakeTVmaze().attach(ctx)
     pg = ctx.new_page()
     errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
