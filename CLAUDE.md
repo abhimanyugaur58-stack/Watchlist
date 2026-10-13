@@ -54,9 +54,9 @@ Abhimanyu wants the next update to be exactly this, nothing else first:
 
 1. An English app name, replacing "वॉच-लिस्ट". This is the launcher label in `android/res/values/strings.xml` plus the in-app title and subtitle.
 2. A new logo (`android/res/mipmap-*/ic_launcher.png`).
-3. New interface colours: the `:root` tokens in `docs/app.html`.
+3. ~~New interface colours~~: done in 3.1 as a live update (navy `#0D1628` + brass `#D4A64A`). He let Claude choose the colours.
 
-Name and logo live in the APK, so this needs a new shell build: versionCode 6, a `SHELL` bump is not required. Ship the colours in the same release.
+Name and logo live in the APK, so they need a new shell build: versionCode 6; a `SHELL` bump is not required. In the same build, change the starter page background in `android/assets/index.html` and `setBackgroundColor` in `MainActivity.smali` from `#121419` (`-0xedebe7`) to `#0D1628` (`-0xf2e9d8`), so the start-up flash matches. Make the new icon fit the navy-and-brass colours.
 
 Before building, show him two or three options for each (a picture of the icon and of one screen) and let him pick.
 
@@ -64,3 +64,4 @@ Before building, show him two or three options for each (a picture of the icon a
 
 - 1.0 / 1.1: simple list. 2.0: five-screen design (अभी, सूची, देख लीं, विवरण, सेटिंग). 2.1: tablet layout.
 - 3.0 (shell 3, versionCode 5): live updates, "क्या नया है", backup reminder dot.
+- 3.1 (live, build 31): navy-and-brass colours.

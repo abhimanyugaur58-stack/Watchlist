@@ -15,17 +15,22 @@ assets = OUT / "assets"
 shutil.rmtree(assets, ignore_errors=True)
 assets.mkdir(parents=True)
 shutil.copy(REPO / "android" / "assets" / "index.html", assets / "index.html")
-shutil.copy(APP, assets / "app.html")
 LOADER = (assets / "index.html").as_uri()
-page_src = APP.read_text(encoding="utf-8")
-base_build = int(re.search(r"const BUILD = (\d+);", page_src).group(1))
-assert f"var BUNDLED = {base_build};" in (assets / "index.html").read_text(encoding="utf-8"), "starter page BUNDLED must match BUILD"
+docs_src = APP.read_text(encoding="utf-8")
+docs_build = int(re.search(r"const BUILD = (\d+);", docs_src).group(1))
+base_build = int(re.search(r"var BUNDLED = (\d+);", (assets / "index.html").read_text(encoding="utf-8")).group(1))
+assert docs_build >= base_build, "docs/app.html must never be older than the page bundled in the APK"
+# The bundled copy as the APK has it: today's page, numbered like the APK's own copy.
+page_src = docs_src.replace(f"const BUILD = {docs_build};", f"const BUILD = {base_build};")
+(assets / "app.html").write_text(page_src, encoding="utf-8")
+FAR = 100  # fake online builds sit far above every real one
 
 
 def variant(build, version, extra=""):
     s = page_src.replace(f"const BUILD = {base_build};", f"const BUILD = {build};")
     s = re.sub(r'const VERSION = "[^"]+";', f'const VERSION = "{version}";', s)
     s = s.replace("const CHANGES = {", "const CHANGES = {\n  " + str(build) + ': ["परीक्षण वाला नया बदलाव ' + version + '"],', 1)
+    assert str(build) + ": [" not in page_src
     return s.replace("'use strict';", "'use strict';" + extra, 1)
 
 
@@ -85,10 +90,10 @@ with sync_playwright() as p:
     pg.screenshot(path=str(OUT / "u01-latest.png"), full_page=True)
 
     # A new version goes online.
-    publish(base_build + 1, "3.1", variant(base_build + 1, "3.1"))
+    publish(base_build + FAR + 1, "3.1", variant(base_build + FAR + 1, "3.1"))
     start()
     pg.wait_for_timeout(1800)
-    check(ls("wl-code-v") == str(base_build + 1), "new version downloaded in the background")
+    check(ls("wl-code-v") == str(base_build + FAR + 1), "new version downloaded in the background")
     check("नया संस्करण 3.1 तैयार है" in txt("#scr-now"), "Now screen: ready banner")
     pg.screenshot(path=str(OUT / "u02-ready.png"))
     pg.click("#scr-now >> text=अभी लगाएँ")
@@ -101,7 +106,7 @@ with sync_playwright() as p:
     check(ls("wl-boot") is None, "new version reported a good start")
     pg.screenshot(path=str(OUT / "u03-updated.png"))
     pg.click("#scr-now .whatsnew >> text=ठीक है")
-    check(not pg.is_visible("#scr-now .whatsnew") and ls("wl-seen-build") == str(base_build + 1), "what's new dismissed")
+    check(not pg.is_visible("#scr-now .whatsnew") and ls("wl-seen-build") == str(base_build + FAR + 1), "what's new dismissed")
     pg.click("#tabs .tab >> text=सूची")
     pg.go_back()
     pg.wait_for_timeout(200)
@@ -121,24 +126,24 @@ with sync_playwright() as p:
     remote.pop("offline")
 
     # A page with a syntax error is never stored.
-    broken = variant(base_build + 2, "3.2").replace("function base(id)", "function base(id) {{", 1)
-    publish(base_build + 2, "3.2", broken)
+    broken = variant(base_build + FAR + 2, "3.2").replace("function base(id)", "function base(id) {{", 1)
+    publish(base_build + FAR + 2, "3.2", broken)
     pg.click("#scr-settings >> text=अभी अपडेट जाँचें")
     pg.wait_for_timeout(800)
-    check(ls("wl-code-v") == str(base_build + 1), "syntax-broken page rejected, 3.1 kept")
+    check(ls("wl-code-v") == str(base_build + FAR + 1), "syntax-broken page rejected, 3.1 kept")
     check("सही जवाब नहीं मिला" in txt("#scr-settings"), "rejection shown as an error")
 
     # A page that crashes on start: stored, fails once, then the starter page falls back.
-    crash = variant(base_build + 3, "3.3", ' throw new Error("test crash");')
-    publish(base_build + 3, "3.3", crash)
+    crash = variant(base_build + FAR + 3, "3.3", ' throw new Error("test crash");')
+    publish(base_build + FAR + 3, "3.3", crash)
     pg.click("#scr-settings >> text=अभी अपडेट जाँचें")
     pg.wait_for_timeout(800)
-    check(ls("wl-code-v") == str(base_build + 3), "crashing page downloaded (syntax is fine)")
+    check(ls("wl-code-v") == str(base_build + FAR + 3), "crashing page downloaded (syntax is fine)")
     pg.goto(LOADER)
     pg.wait_for_timeout(1200)
-    check(not pg.is_visible("#scr-now .card") and ls("wl-boot") == str(base_build + 3), "crashing page left a failed-start mark")
+    check(not pg.is_visible("#scr-now .card") and ls("wl-boot") == str(base_build + FAR + 3), "crashing page left a failed-start mark")
     start()
-    check(pg.url.endswith("/app.html?shell=3") and ls("wl-bad-v") == str(base_build + 3), "next start falls back to the bundled page")
+    check(pg.url.endswith("/app.html?shell=3") and ls("wl-bad-v") == str(base_build + FAR + 3), "next start falls back to the bundled page")
     check("111 / 134" in txt("#scr-now"), "list safe after the fallback")
     pg.wait_for_timeout(1800)
     check(ls("wl-code") is None, "bad version not downloaded again")
@@ -146,7 +151,7 @@ with sync_playwright() as p:
     check("रोक दिया" in txt("#scr-settings"), "settings explains the blocked version")
 
     # A version that needs a newer Android shell.
-    publish(base_build + 4, "4.0", variant(base_build + 4, "4.0"), min_shell=4)
+    publish(base_build + FAR + 4, "4.0", variant(base_build + FAR + 4, "4.0"), min_shell=4)
     pg.click("#scr-settings >> text=अभी अपडेट जाँचें")
     pg.wait_for_timeout(800)
     href = pg.get_attribute("#scr-settings a >> text=नया ऐप डाउनलोड करें", "href")

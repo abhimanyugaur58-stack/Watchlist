@@ -1,6 +1,6 @@
 import json, sys
 from playwright.sync_api import sync_playwright
-from common import APP_URL as URL, OUT, load_fixture, Checker
+from common import APP_URL as URL, OUT, VERSION, load_fixture, Checker
 SHOTS = str(OUT) + "/"
 check = Checker()
 
@@ -156,7 +156,7 @@ with sync_playwright() as p:
     href = pg.get_attribute("#scr-settings a[href^='whatsapp']", "href")
     check(href.startswith("whatsapp://send?text=WL2"), "whatsapp link")
     st_txt = txt("#scr-settings")
-    check("आपका संस्करण 3.0" in st_txt and "इंटरनेट पर खुला संस्करण" in st_txt, "update card in a plain browser")
+    check(("आपका संस्करण " + VERSION) in st_txt and "इंटरनेट पर खुला संस्करण" in st_txt, "update card in a plain browser")
     pg.screenshot(path=SHOTS + "09-settings.png", full_page=True)
     before = st()
     # wipe and restore

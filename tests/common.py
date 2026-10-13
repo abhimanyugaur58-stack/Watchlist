@@ -1,10 +1,12 @@
 """Shared bits for the browser tests (Playwright + Chromium)."""
 import json
+import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 APP = REPO / "docs" / "app.html"
 APP_URL = APP.as_uri()
+VERSION = re.search(r'const VERSION = "([^"]+)";', APP.read_text(encoding="utf-8")).group(1)
 OUT = REPO / "test-out"
 OUT.mkdir(exist_ok=True)
 KEY = "abhimanyu-watchlist-v2"

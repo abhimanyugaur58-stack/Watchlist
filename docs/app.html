@@ -8,20 +8,23 @@
 <style>
 /* Layout: phone app shell — one scrolling screen at a time, bottom tab bar on the three main tabs. Dark only, by design. */
 :root {
-  --bg: #121419;
-  --surface: #1B1E26;
-  --surface2: #232733;
-  --fg: #EDEEF2;
-  --muted: #A3A9B7;
-  --dim: #6E7483;
-  --line: #2E3340;
-  --accent: #F27D91;
-  --accent-bg: #3A1D25;
-  --primary: #B8304A;
-  --ok: #6CC891; --ok-bg: #173024;
-  --warn: #E3B04F; --warn-bg: #362A12;
-  --likely: #8EA8E6; --likely-bg: #1E2740;
-  --danger: #F2857B; --danger-line: #6B2A33;
+  /* Night-time study of a power drama: deep navy with brass. Brass marks what you act on and what you have watched;
+     orange is kept for things that need checking. */
+  --bg: #0D1628;
+  --surface: #15203A;
+  --surface2: #1C2A48;
+  --fg: #EEF1F7;
+  --muted: #A3AEC6;
+  --dim: #76829E;
+  --line: #2A3A5E;
+  --accent: #E3BD6C;
+  --accent-bg: #3A3322;
+  --primary: #D4A64A;
+  --on-primary: #0D1628;
+  --ok: #72D29B; --ok-bg: #123329;
+  --warn: #F29B66; --warn-bg: #3D2718;
+  --likely: #A3B8F5; --likely-bg: #1E2C54;
+  --danger: #F28B82; --danger-line: #6E2E33;
   --font-display: "Noto Serif Devanagari", "Noto Serif", serif;
   --font-body: "Noto Sans Devanagari", "Roboto", sans-serif;
   color-scheme: dark;
@@ -63,7 +66,7 @@ h1, h2, h3, p { margin: 0; }
 .split { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .btn { min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--fg); font-size: 14px; }
-.btn.primary { border: 0; background: var(--primary); color: #fff; font-weight: 700; }
+.btn.primary { border: 0; background: var(--primary); color: var(--on-primary); font-weight: 700; }
 .btn.big { min-height: 58px; border-radius: 16px; font-size: 19px; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .btn.wide { width: 100%; }
 .btn.danger { border-color: var(--danger-line); color: var(--danger); }
@@ -78,7 +81,7 @@ h1, h2, h3, p { margin: 0; }
 .qrow.current { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--primary); }
 .qrow.done .qname { text-decoration: line-through; color: var(--muted); }
 .qnum { width: 32px; height: 32px; flex-shrink: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--surface2); color: var(--accent); }
-.qrow.current .qnum { background: var(--primary); color: #fff; }
+.qrow.current .qnum { background: var(--primary); color: var(--on-primary); }
 .qrow.done .qnum { background: var(--ok-bg); color: var(--ok); }
 .qname { font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
 .qmeta { font-size: 12px; color: var(--muted); }
@@ -103,7 +106,7 @@ h1, h2, h3, p { margin: 0; }
 .schip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 .stepper { display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; gap: 10px; }
 .step { width: 56px; height: 56px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface2); color: var(--fg); display: flex; align-items: center; justify-content: center; }
-.step.plus { border: 0; background: var(--primary); color: #fff; }
+.step.plus { border: 0; background: var(--primary); color: var(--on-primary); }
 .count { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .count b { font-family: var(--font-display); font-size: 34px; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .count small { font-size: 18px; color: var(--muted); }
@@ -112,7 +115,7 @@ h1, h2, h3, p { margin: 0; }
 .char .cn { font-size: 15px; font-weight: 700; }
 .char .ct { font-size: 12px; }
 .x { width: 32px; height: 32px; border: 0; border-radius: 16px; background: transparent; color: var(--muted); display: flex; align-items: center; justify-content: center; }
-.ct-0 { color: var(--accent); } .ct-1 { color: var(--likely); } .ct-2 { color: var(--warn); } .ct-3 { color: var(--ok); } .ct-4 { color: #C9A3F0; }
+.ct-0 { color: var(--accent); } .ct-1 { color: var(--likely); } .ct-2 { color: var(--warn); } .ct-3 { color: var(--ok); } .ct-4 { color: #C7A6F2; }
 .note { display: flex; gap: 8px; align-items: flex-start; padding: 12px 8px 12px 14px; border-radius: 14px; background: var(--surface); }
 .note .nl { font-size: 12px; color: var(--muted); }
 .note .nt { font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-line; }
@@ -126,11 +129,11 @@ h1, h2, h3, p { margin: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .scores { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; max-width: 560px; }
 .score { height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface2); color: var(--fg); font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.score[aria-pressed="true"] { background: var(--warn); border-color: var(--warn); color: var(--bg); }
+.score[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-primary); }
 .diary { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 16px; background: var(--surface); }
 .diary-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .diary-name { font-size: 17px; font-weight: 700; background: none; border: 0; padding: 0; color: var(--fg); text-align: left; }
-.rating { font-size: 15px; font-weight: 700; color: var(--warn); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rating { font-size: 15px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .quote { font-size: 15px; line-height: 1.5; }
 .empty { color: var(--muted); font-size: 14px; }
 .footer-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 12px 20px 16px; border-top: 1px solid var(--line); background: var(--surface); flex-shrink: 0; }
@@ -142,12 +145,12 @@ nav.tabs { height: 74px; flex-shrink: 0; display: grid; grid-template-columns: r
 nav.tabs[hidden] { display: none; }
 .tab { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: transparent; color: var(--muted); font-size: 12px; min-height: 56px; justify-content: center; }
 .tab[aria-current="page"] { color: var(--accent); font-weight: 700; }
-.fab { justify-self: center; width: 56px; height: 56px; border: 0; border-radius: 28px; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; }
+.fab { justify-self: center; width: 56px; height: 56px; border: 0; border-radius: 28px; background: var(--primary); color: var(--on-primary); display: flex; align-items: center; justify-content: center; }
 
-#snack { position: fixed; left: 16px; right: 16px; bottom: 86px; background: #EDEEF2; color: #121419; border-radius: 14px; padding: 10px 10px 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+#snack { position: fixed; left: 16px; right: 16px; bottom: 86px; background: var(--fg); color: var(--bg); border-radius: 14px; padding: 10px 10px 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
 #snack[hidden] { display: none; }
 #snack.low { bottom: 16px; }
-#snack button { border: 0; background: transparent; color: #8C1C2E; font-weight: 700; font-size: 14px; min-height: 40px; padding: 0 8px; }
+#snack button { border: 0; background: transparent; color: #7A5200; font-weight: 700; font-size: 14px; min-height: 40px; padding: 0 8px; }
 @media (max-width: 360px) { .grid2 { grid-template-columns: 1fr; } .title { font-size: 26px; } }
 
 /* ---------- Tablet ----------
@@ -250,12 +253,12 @@ const LISTS = ["main", "break", "maybe", "archive"];
 const LIST_NAME = { main: "मुख्य क्रम", break: "छोटा ब्रेक", maybe: "हिंदी मिले तो देखें", archive: "पहले देखी हुई" };
 const H = { ok: "हिंदी ✓", likely: "हिंदी लगभग पक्की", check: "हिंदी जाँचें" };
 const CHAR_TYPES = ["धूसर नायक", "सब संभालने वाला स्तंभ", "पिछली कहानी", "क्षमता वाला शिष्य", "अथॉरिटी वाला विरोधी"];
-const TILE_COLORS = ["#2B3A5C", "#3D2B52", "#2C4A43", "#4A3426", "#2E3E52", "#4A2B37", "#3A4426"];
+const TILE_COLORS = ["#2D4A80", "#4B3A73", "#2C5E58", "#6E4C2C", "#3C5577", "#6E3448", "#55602F"];
 const KEY = "abhimanyu-watchlist-v2";
 const OLD_KEY = "abhimanyu-watchlist-done";
-const VERSION = "3.0";
+const VERSION = "3.1";
 // BUILD goes up by one on every live update; docs/version.json must carry the same number.
-const BUILD = 30;
+const BUILD = 31;
 // Which Android shell is running this page: the starter page sets it; 0 means a plain browser.
 const SHELL = (window.WL_SHELL | 0) || (parseInt(new URLSearchParams(location.search).get("shell"), 10) || 0);
 const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
@@ -263,6 +266,10 @@ const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
 const APK_URL = LIVE_BASE + "watchlist.apk";
 // Shown once in the "क्या नया है" card after the update arrives.
 const CHANGES = {
+  31: [
+    "नए रंग: गहरा नीला और पीतल जैसा सुनहरा। बड़े बटन, प्रगति की पट्टी और अंक अब सुनहरे दिखते हैं।",
+    "जिन चीज़ों पर ध्यान देना है, जैसे \"हिंदी जाँचें\" और बैकअप का बिंदु, वे अब नारंगी हैं।"
+  ],
   30: [
     "लाइव अपडेट: नए फ़ीचर अब इंटरनेट से अपने आप आएँगे। ऐप दोबारा इंस्टॉल नहीं करना पड़ेगा।",
     "हर अपडेट के बाद यहीं बताया जाएगा कि क्या बदला।",
@@ -746,7 +753,7 @@ function renderNow() {
       side.append(sec);
     }
     const rem = mainRemaining();
-    side.append(h("section", { class: "stat" }, h("span", { style: "color:var(--warn);display:flex" }, icon("cal", 22)),
+    side.append(h("section", { class: "stat" }, h("span", { style: "color:var(--accent);display:flex" }, icon("cal", 22)),
       h("p", null, rem + " एपिसोड बाकी। रोज़ " + state.pace + " देखें तो " + monthsText(rem, state.pace) + "।")));
     body.append(side);
   }
