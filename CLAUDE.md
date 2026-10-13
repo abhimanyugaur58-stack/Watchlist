@@ -48,6 +48,18 @@ Only for shell changes: permissions, icon, app name, or native code in `smali/`.
 - GitHub Pages is on: branch `main`, folder `/docs` (set by Abhimanyu on 13 Oct 2026).
 - The session shell got 403 for github.io; the web-fetch tool could read it.
 
+## Agreed next update (asked for on 13 Oct 2026, not started)
+
+Abhimanyu wants the next update to be exactly this, nothing else first:
+
+1. An English app name, replacing "वॉच-लिस्ट". This is the launcher label in `android/res/values/strings.xml` plus the in-app title and subtitle.
+2. A new logo (`android/res/mipmap-*/ic_launcher.png`).
+3. New interface colours: the `:root` tokens in `docs/app.html`.
+
+Name and logo live in the APK, so this needs a new shell build: versionCode 6, a `SHELL` bump is not required. Ship the colours in the same release.
+
+Before building, show him two or three options for each (a picture of the icon and of one screen) and let him pick.
+
 ## History
 
 - 1.0 / 1.1: simple list. 2.0: five-screen design (अभी, सूची, देख लीं, विवरण, सेटिंग). 2.1: tablet layout.
