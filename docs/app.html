@@ -259,7 +259,8 @@ const BUILD = 30;
 // Which Android shell is running this page: the starter page sets it; 0 means a plain browser.
 const SHELL = (window.WL_SHELL | 0) || (parseInt(new URLSearchParams(location.search).get("shell"), 10) || 0);
 const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
-const APK_URL = "https://github.com/abhimanyugaur58-stack/Watchlist/releases/latest";
+// The newest APK always sits next to the page, so this link never changes.
+const APK_URL = LIVE_BASE + "watchlist.apk";
 // Shown once in the "क्या नया है" card after the update arrives.
 const CHANGES = {
   30: [

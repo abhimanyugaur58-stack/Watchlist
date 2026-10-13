@@ -38,9 +38,13 @@ Only for shell changes: permissions, icon, app name, or native code in `smali/`.
 4. Bump `versionCode` (+1) and `versionName` in `android/apktool.yml`.
 5. Run `tools/build.sh`. It copies `docs/app.html` into the APK, builds with Apktool 2.10.0, and signs with `android/signing/debug.keystore` (alias `androiddebugkey`, password `android`). It refuses to finish if the certificate SHA-256 is not `1e08a903aef9c3a721510b64ec764d01d3d094eb954161b62544ea8f187b5953`.
    - Android only installs an update over the old app when the key matches. A different key means he has to uninstall, and that wipes his data.
-6. Publish `dist/watchlist.apk` as a GitHub release asset named `watchlist.apk` (tag `vX.Y`). The app's "नया ऐप डाउनलोड करें" button opens `releases/latest`.
+6. Copy `dist/watchlist.apk` to `docs/watchlist.apk` and commit it. Pages serves it at `https://abhimanyugaur58-stack.github.io/Watchlist/watchlist.apk`, which is where the app's "नया ऐप डाउनलोड करें" button points. (Creating GitHub releases is blocked from Claude sessions, so releases are not used.) Also send the APK in chat.
 7. If live pages now need the new shell, set `minShell` in `docs/version.json`, so older phones are told to install the APK instead of downloading a page they can't run.
 8. Remind him to copy a backup code before installing, and to install over the old app without uninstalling.
+
+## Session limits seen so far
+
+- Claude can push to `main`, but cannot call the Pages settings API or create releases. Changing those settings is a job for Abhimanyu in the GitHub website.
 
 ## History
 

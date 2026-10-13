@@ -17,4 +17,4 @@
 
 Claude से चैट में नया फ़ीचर माँगिए। Claude बदलाव को यहाँ `docs/app.html` में डालता है, जाँचता है, और ऐप अगली बार खुलते ही उसे ले लेता है।
 
-नया ऐप (APK) डाउनलोड करना हो तो: [Releases](https://github.com/abhimanyugaur58-stack/Watchlist/releases/latest)
+नया ऐप (APK) डाउनलोड करना हो तो: https://abhimanyugaur58-stack.github.io/Watchlist/watchlist.apk

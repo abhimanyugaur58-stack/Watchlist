@@ -150,7 +150,7 @@ with sync_playwright() as p:
     pg.click("#scr-settings >> text=अभी अपडेट जाँचें")
     pg.wait_for_timeout(800)
     href = pg.get_attribute("#scr-settings a >> text=नया ऐप डाउनलोड करें", "href")
-    check(href == "https://github.com/abhimanyugaur58-stack/Watchlist/releases/latest" and ls("wl-code") is None, "needs new APK: link shown, page not stored")
+    check(href == LIVE + "watchlist.apk" and ls("wl-code") is None, "needs new APK: link shown, page not stored")
     pg.screenshot(path=str(OUT / "u04-need-apk.png"), full_page=True)
 
     # A download older than the bundled page is dropped.
