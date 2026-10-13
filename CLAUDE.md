@@ -25,7 +25,7 @@ The owner is Abhimanyu. He speaks Hindi and does not read English, usually write
    - Keep `KEY`, the `WL2:` backup format and `loadState()` able to read every older state.
    - Add migrations rather than renaming fields.
 5. Run `tests/run_all.sh`, which uses Python Playwright with Chromium. Update or add checks for the change. Every check must pass.
-6. Commit and push to `main`. Pages redeploys in about a minute. Confirm with `curl -s https://abhimanyugaur58-stack.github.io/Watchlist/version.json`.
+6. Commit and push to `main`. Pages redeploys in about a minute. Confirm by reading `https://abhimanyugaur58-stack.github.io/Watchlist/version.json` with the web-fetch tool (the session shell may not be allowed to reach github.io).
 7. Tell him in Hindi what changed. The phone and tablet pick it up the next time the app opens; "सेटिंग → अभी अपडेट जाँचें" forces a check.
 
 ## When a new APK is needed (rare)
@@ -45,6 +45,8 @@ Only for shell changes: permissions, icon, app name, or native code in `smali/`.
 ## Session limits seen so far
 
 - Claude can push to `main`, but cannot call the Pages settings API or create releases. Changing those settings is a job for Abhimanyu in the GitHub website.
+- GitHub Pages is on: branch `main`, folder `/docs` (set by Abhimanyu on 13 Oct 2026).
+- The session shell got 403 for github.io; the web-fetch tool could read it.
 
 ## History
 
