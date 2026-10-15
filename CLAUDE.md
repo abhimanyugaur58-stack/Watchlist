@@ -16,6 +16,7 @@ The owner is Abhimanyu. He speaks Hindi and does not read English, usually write
 - Posters come from TVmaze (free, no key, CC BY-SA; credited in settings). Built-in series use fixed ids in `TV_IDS` (picked by hand: "Suits" alone has five shows on TVmaze). Series he adds himself are matched only on an exact name, and he can pick another poster by tapping the poster on the detail screen; choices live in `state.tv` (0 = no poster). Images are shrunk and stored in localStorage as `wl-poster:<tvmaze id>`. They are not part of the backup code.
 - Series info also comes from TVmaze: one call per show, `shows/:id?embed[]=episodes&embed[]=nextepisode`, kept in localStorage as `wl-info:<tvmaze id>` and refreshed after three days. Episode counts come from the episode list (regular episodes only, grouped by season); when TVmaze skips a season number (La Casa de Papel: 1, 3, 4, 5) the counts get `labels`. The detail screen shows it in "जानकारी" (`infoSection`), and offers "सही गिनती लगाएँ" on his own series when the counts differ. Not part of the backup code.
 - The add screen searches TVmaze while he types (550 ms pause, `addSearch`). Picking a result links the series (`state.tv`) and fills the channel and exact counts. The form keeps what was typed in `ui.add`, so a redraw loses nothing; the FAB and the "नई सीरीज़ जोड़ें" button start a fresh one.
+- The owner's signature (traced from his photo, `brand/signature-*.svg`) is inlined in `app.html` as `SIG_VB` / `SIG_D` in a small first script, which also fills the opening screen `#intro` before anything else draws. `startIntro()` removes it after about 1.25 s, or at once on a tap (the tap never reaches the screen below). Settings has the "इस ऐप के मालिक" card with an on/off switch, stored per device as `wl-intro` ("off"/"on"), not in the backup. Checks other than `tests/test_intro.py` switch the opening off with `ctx.add_init_script(NO_INTRO)`; do the same in any new test context.
 - All user data stays on the device in localStorage under the key `abhimanyu-watchlist-v2`. Phone and tablet are separate. The backup code (`WL2:` + base64 JSON) moves data between them.
 - The repo is public. Never commit personal data such as his notes or real progress. Test fixtures use made-up values.
 
@@ -49,6 +50,7 @@ Only for shell changes: permissions, icon, app name, or native code in `smali/`.
 
 - Claude can push to `main`, but cannot call the Pages settings API or create releases. Changing those settings is a job for Abhimanyu in the GitHub website.
 - GitHub Pages is on: branch `main`, folder `/docs` (set by Abhimanyu on 13 Oct 2026).
+- Two checks each failed once on the first full run after a pause and passed on every rerun (about 20 runs): test_tablet "finished list + Peaky detail" and test_info "own series: count fixing offered". Cause not found; both now print a DEBUG line with the page state if they fail. If one fails, rerun before digging, and read the DEBUG line.
 - The session shell got 403 for github.io and TVmaze; the web-fetch tool could read both. Tests fake TVmaze (`tests/common.py`, `FakeTVmaze`) with plain stand-in posters.
 
 ## Agreed next update (asked for on 13 Oct 2026, not started)
@@ -72,5 +74,6 @@ Before building, show him two or three options for each (a picture of the icon a
 - 3.1 (live, build 31): navy-and-brass colours.
 - 3.2 (live, build 32): real posters, blurred poster backdrop on the detail screen, poster picker, brass seal when a series is finished, seal art for empty screens.
 - 3.3 (live, build 33): suggestions from TVmaze while typing a name on the add screen (fills channel, exact counts, poster); "जानकारी" on the detail screen (years, status, channel, language, runtime, rating, genres in Hindi, next episode date); exact-count fix for his own series. Checks in `tests/test_info.py`.
+- 3.4 (live, build 34): his signature (approved 15 Oct 2026): opening screen, owner card in settings with the on/off switch, signature and © line on the GitHub front page.
 - Talked about, not asked to build yet: linking with a calendar ("कैलेंडर में जोड़ें" button for the next episode is the easy first step).
 - Agreed later steps for graphics: chess-piece emblems for the five character types, then a weekly-episodes chart. That chart needs a watch log with dates, and must have no streaks.

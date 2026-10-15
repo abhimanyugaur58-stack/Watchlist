@@ -67,6 +67,8 @@ with sync_playwright() as p:
     # finished side by side
     pg.click("#tabs .tab >> text=देख लीं")
     check(vis("#scr-finished") and vis("#detail-pane") and "Peaky Blinders" in pg.inner_text("#scr-detail"), "landscape: finished list + Peaky detail")
+    if not vis("#scr-finished"):  # failed once on a cold first run (15 Oct 2026); this line shows the state if it happens again
+        print("DEBUG", pg.evaluate("[screen, JSON.stringify(history.state), pendingTab, document.getElementById('scr-finished').innerHTML.length]"), errors)
     pg.click("#scr-finished .diary-name >> text=Game of Thrones")
     check("Game of Thrones" in pg.inner_text("#scr-detail h1"), "landscape: diary pick swaps pane")
     pg.screenshot(path=S + "t06-landscape-finished.png")
