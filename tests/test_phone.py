@@ -1,6 +1,6 @@
 import json, sys
 from playwright.sync_api import sync_playwright
-from common import APP_URL as URL, OUT, VERSION, load_fixture, Checker, FakeTVmaze, NO_INTRO
+from common import APP_URL as URL, OUT, VERSION, FIXTURE, load_fixture, Checker, FakeTVmaze, NO_INTRO
 SHOTS = str(OUT) + "/"
 check = Checker()
 
@@ -78,7 +78,7 @@ with sync_playwright() as p:
     pg.click("nav#tabs >> text=सूची")
     pg.screenshot(path=SHOTS + "06-queue.png", full_page=False)
     q = txt("#scr-queue")
-    check("1 / 11 पूरी" in q, "queue header 1/11")
+    check("1 / 12 पूरी" in q, "queue header 1/12 (Ozark joined the main order in 3.5)")
     pg.click("#scr-queue .fchip >> text=JioHotstar")
     q = txt("#scr-queue")
     check("Succession" in q and "Narcos" not in q, "JioHotstar filter")
@@ -110,7 +110,7 @@ with sync_playwright() as p:
     pg.click("#scr-detail .panel button.primary")
     s = st(); check(s["layout"]["main"][0] == "vikings", "moved Vikings to first")
     pg.click("#snack-undo")
-    s = st(); check(s["layout"]["main"].index("vikings") == 7, "undo move")
+    s = st(); check(s["layout"]["main"].index("vikings") == 8, "undo move (Ozark sits before Vikings since 3.5)")
     # Hindi change
     pg.click("#detail-actions >> text=हिंदी बदलें")
     pg.select_option("#hindi-vikings", "check")
@@ -200,6 +200,41 @@ with sync_playwright() as p:
     f = txt("#scr-finished")
     check("The Gentlemen" in f and "Peaky" not in f, "diary has gentlemen only")
     pg.screenshot(path=SHOTS + "10-finished-migrated.png", full_page=True)
+
+    # ---- 3.5: Ozark (Hindi found) leaves "हिंदी मिले तो देखें" for the main order, right after Narcos, once
+    def saved(s):
+        pg.evaluate("s => { localStorage.clear(); localStorage.setItem('abhimanyu-watchlist-v2', JSON.stringify(s)); }", s)
+        pg.reload()
+        return st()
+    old34 = json.loads(json.dumps(FIXTURE)); old34["hindi"] = {"ozark": "likely"}
+    s = saved(old34)
+    m = s["layout"]["main"]
+    check("ozark" not in s["layout"]["maybe"] and m.index("ozark") == m.index("narcos") + 1 and m.index("lincoln") == m.index("ozark") + 1,
+          "3.5: saved Ozark moves to main after Narcos " + str(m))
+    check("ozark-hindi" in s["migs"] and "ozark" not in s["hindi"], "3.5: move marked done, old Hindi mark cleared")
+    pg.click("nav#tabs >> text=सूची")
+    q = txt("#scr-queue")
+    main_part = q.split("छोटा ब्रेक")[0]
+    check("Ozark" in main_part and main_part.index("Narcos") < main_part.index("Ozark") < main_part.index("The Lincoln Lawyer"),
+          "3.5: list shows Ozark between Narcos and The Lincoln Lawyer")
+    pg.click("#scr-queue .qrow >> text=Ozark")
+    d = txt("#scr-detail")
+    check("हिंदी ✓ (आपने देखा)" in d and "हिंदी जाँचें" not in d, "3.5: Ozark detail shows Hindi ✓")
+    pg.screenshot(path=SHOTS + "11-ozark-detail.png", full_page=True)
+    pg.go_back(); pg.wait_for_timeout(100)
+
+    moved_back = json.loads(json.dumps(s)); moved_back["layout"]["main"].remove("ozark"); moved_back["layout"]["maybe"].append("ozark")
+    s = saved(moved_back)
+    check("ozark" in s["layout"]["maybe"] and "ozark" not in s["layout"]["main"], "3.5: a later move by hand stays")
+
+    no_narcos = json.loads(json.dumps(FIXTURE)); no_narcos["layout"]["main"].remove("narcos"); no_narcos["removed"] = ["narcos"]
+    m = saved(no_narcos)["layout"]["main"]
+    check(m.index("lincoln") == m.index("ozark") + 1, "3.5: Narcos deleted -> Ozark before The Lincoln Lawyer " + str(m))
+
+    pg.evaluate("() => localStorage.clear()"); pg.reload()
+    s = st(); m = s["layout"]["main"]
+    check(m.index("ozark") == m.index("narcos") + 1 and "ozark" not in s["layout"]["maybe"], "3.5: fresh install has Ozark after Narcos")
+    check(not errors, "no JS errors after Ozark checks: " + "; ".join(errors))
 
     # ---- Migration from v1.0 key
     pg.evaluate("() => { localStorage.clear(); localStorage.setItem('abhimanyu-watchlist-done', JSON.stringify(['suits'])); }")

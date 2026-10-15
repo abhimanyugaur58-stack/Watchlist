@@ -306,12 +306,12 @@ const CATALOG = {
   bcs: { name: "Better Call Saul + Breaking Bad", where: "प्लेटफ़ॉर्म जाँचें", hindi: "check", hindiText: "हिंदी सिर्फ़ TV पर आई थी", why: "जिमी टिरियन जैसा है: चालाक, पर दिल वाला। फिर वॉल्टर का दिमाग़ से साम्राज्य।", seasons: [10, 10, 10, 10, 10, 13, 7, 13, 13, 13, 16], labels: ["BCS 1", "BCS 2", "BCS 3", "BCS 4", "BCS 5", "BCS 6", "BB 1", "BB 2", "BB 3", "BB 4", "BB 5"] },
   narcosmx: { name: "Narcos: Mexico", where: "Netflix", hindi: "check", why: "Narcos के बाद उसी कहानी का अगला हिस्सा।", seasons: [10, 10, 10] },
   designated: { name: "Designated Survivor", where: "प्लेटफ़ॉर्म जाँचें", hindi: "check", why: "एक मामूली मंत्री अचानक राष्ट्रपति। अनचाही सत्ता और मूल्य।", seasons: [21, 22, 10] },
-  ozark: { name: "Ozark", where: "Netflix", hindi: "check", why: "एक फ़ाइनेंशियल एडवाइज़र, कार्टेल का पैसा और परिवार ही अंदरूनी घेरा।", seasons: [10, 10, 10, 14] }
+  ozark: { name: "Ozark", where: "Netflix", hindi: "ok", hindiText: "हिंदी ✓ (आपने देखा)", why: "Narcos वाली दुनिया, पैसे की तरफ़ से। एक फ़ाइनेंशियल एडवाइज़र कार्टेल का पैसा सफ़ेद करता है, और मार्टी-वेंडी की जोड़ी The Diplomat जैसी है।", seasons: [10, 10, 10, 14] }
 };
 const DEFAULT_LAYOUT = {
-  main: ["suits", "hoc", "crown", "diplomat", "succession", "narcos", "lincoln", "vikings", "moneyheist", "guinness", "hotd"],
+  main: ["suits", "hoc", "crown", "diplomat", "succession", "narcos", "ozark", "lincoln", "vikings", "moneyheist", "guinness", "hotd"],
   break: ["gentlemen"],
-  maybe: ["billions", "bcs", "narcosmx", "designated", "ozark"],
+  maybe: ["billions", "bcs", "narcosmx", "designated"],
   archive: []
 };
 const LISTS = ["main", "break", "maybe", "archive"];
@@ -321,9 +321,9 @@ const CHAR_TYPES = ["धूसर नायक", "सब संभालने �
 const TILE_COLORS = ["#2D4A80", "#4B3A73", "#2C5E58", "#6E4C2C", "#3C5577", "#6E3448", "#55602F"];
 const KEY = "abhimanyu-watchlist-v2";
 const OLD_KEY = "abhimanyu-watchlist-done";
-const VERSION = "3.4";
+const VERSION = "3.5";
 // BUILD goes up by one on every live update; docs/version.json must carry the same number.
-const BUILD = 34;
+const BUILD = 35;
 // Which Android shell is running this page: the starter page sets it; 0 means a plain browser.
 const SHELL = (window.WL_SHELL | 0) || (parseInt(new URLSearchParams(location.search).get("shell"), 10) || 0);
 const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
@@ -348,6 +348,9 @@ const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "
 const APK_URL = LIVE_BASE + "watchlist.apk";
 // Shown once in the "क्या नया है" card after the update arrives.
 const CHANGES = {
+  35: [
+    "Ozark अब \"मुख्य क्रम\" में Narcos के ठीक बाद है, क्योंकि उसका हिंदी ऑडियो मिल गया। उस पर अब \"हिंदी ✓\" लिखा है।"
+  ],
   34: [
     "ऐप पर अब आपके हस्ताक्षर हैं: ऐप खुलते समय एक पल के लिए सुनहरे रंग में उभरते हैं। स्क्रीन छूते ही हट जाते हैं।",
     "सेटिंग में सबसे नीचे \"इस ऐप के मालिक\" हिस्सा है। वहीं से खुलते समय वाला सिग्नेचर बंद या चालू कर सकते हैं।"
@@ -422,6 +425,23 @@ function loadState(s) {
   for (const L of LISTS) s.layout[L] = s.layout[L].filter(id => known(id) && !seen.has(id) && seen.add(id));
   for (const L of LISTS) for (const id of DEFAULT_LAYOUT[L]) if (!seen.has(id) && !s.removed.includes(id)) { s.layout[L].push(id); seen.add(id); }
   for (const id of Object.keys(s.custom)) if (!seen.has(id)) { s.layout.main.push(id); seen.add(id); }
+
+  // One-time moves, each named once in s.migs so a later move by hand is never undone.
+  s.migs = Array.isArray(s.migs) ? s.migs.filter(x => typeof x === "string") : [];
+  if (!s.migs.includes("ozark-hindi")) {
+    // 3.5: he found Ozark's Hindi audio on Netflix (15 Oct 2026). Only a copy still waiting in "हिंदी मिले तो देखें" moves:
+    // into the main order right after Narcos (else before The Lincoln Lawyer, else at the end).
+    const i = s.layout.maybe.indexOf("ozark");
+    if (i >= 0) {
+      s.layout.maybe.splice(i, 1);
+      const m = s.layout.main;
+      let at = m.indexOf("narcos");
+      at = at >= 0 ? at + 1 : (m.includes("lincoln") ? m.indexOf("lincoln") : m.length);
+      m.splice(at, 0, "ozark");
+      delete s.hindi.ozark;
+    }
+    s.migs.push("ozark-hindi");
+  }
 
   s.seeded2 = true;
   for (const id of s.done) if (!s.finishedOrder.includes(id)) s.finishedOrder.push(id);
