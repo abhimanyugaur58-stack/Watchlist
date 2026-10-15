@@ -2,7 +2,7 @@
 # Runs every browser check. Needs Python Playwright with Chromium.
 set -eo pipefail
 cd "$(dirname "$0")"
-for t in test_phone.py test_tablet.py test_update.py test_posters.py test_info.py; do
+for t in test_phone.py test_tablet.py test_update.py test_posters.py test_info.py test_intro.py; do
   echo "== $t"
   python3 "$t" | tail -1
 done

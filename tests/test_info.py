@@ -5,7 +5,7 @@ import sys
 import time
 
 from playwright.sync_api import sync_playwright
-from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze
+from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze, NO_INTRO
 
 check = Checker()
 
@@ -23,6 +23,7 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     fake = FakeTVmaze()
     ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
+    ctx.add_init_script(NO_INTRO)
     fake.attach(ctx)
     pg = ctx.new_page()
     errors = []
@@ -129,7 +130,10 @@ with sync_playwright() as p:
 
     # Own series with different counts: fix them, and undo.
     pg.evaluate("openDetail('peaky')")
-    check(wait_for(pg, "document.querySelector('#scr-detail [data-info] .panel') !== null"), "own series: count fixing offered")
+    ok = wait_for(pg, "document.querySelector('#scr-detail [data-info] .panel') !== null")
+    if not ok:
+        print("DEBUG info:", pg.evaluate("(document.querySelector('#scr-detail [data-info]') || {}).innerText"), pg.evaluate("[screen, detailId, tvIdOf('peaky'), localStorage.getItem('wl-info:269') && localStorage.getItem('wl-info:269').slice(0, 200)]"), fake.api_calls[-6:])
+    check(ok, "own series: count fixing offered")
     check("6 सीज़न + फ़िल्म" in pg.inner_text("#scr-detail [data-info] .panel"), "shows what the list has now")
     pg.screenshot(path=str(OUT / "i05-fix-counts.png"), full_page=True)
     pg.click("#scr-detail >> text=सही गिनती लगाएँ")
@@ -174,6 +178,7 @@ with sync_playwright() as p:
 
     # Tablet sideways: the info section in the right-hand pane.
     ctx = b.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1.5, is_mobile=True, has_touch=True)
+    ctx.add_init_script(NO_INTRO)
     FakeTVmaze().attach(ctx)
     pg = ctx.new_page()
     pg.goto(URL)

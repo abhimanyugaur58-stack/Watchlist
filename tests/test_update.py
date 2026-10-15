@@ -5,7 +5,7 @@ import shutil
 import sys
 
 from playwright.sync_api import sync_playwright
-from common import REPO, APP, OUT, KEY, FIXTURE, Checker
+from common import REPO, APP, OUT, KEY, FIXTURE, Checker, NO_INTRO
 
 check = Checker()
 LIVE = "https://abhimanyugaur58-stack.github.io/Watchlist/"
@@ -57,6 +57,7 @@ def publish(build, version, page=None, min_shell=3):
 with sync_playwright() as p:
     b = p.chromium.launch()
     ctx = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+    ctx.add_init_script(NO_INTRO)
     ctx.route(LIVE + "**", serve)
     pg = ctx.new_page()
     errors = []

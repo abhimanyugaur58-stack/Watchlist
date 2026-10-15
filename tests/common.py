@@ -10,6 +10,8 @@ VERSION = re.search(r'const VERSION = "([^"]+)";', APP.read_text(encoding="utf-8
 OUT = REPO / "test-out"
 OUT.mkdir(exist_ok=True)
 KEY = "abhimanyu-watchlist-v2"
+# The opening signature covers the screen for about a second; most checks switch it off (test_intro.py checks it).
+NO_INTRO = "try { localStorage.setItem('wl-intro', 'off'); } catch (e) {}"
 
 # A made-up but realistic saved list: in Suits season 8, House of Cards from season 3, two older series in the diary.
 FIXTURE = {

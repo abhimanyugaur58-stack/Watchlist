@@ -6,7 +6,7 @@ import time
 from urllib.parse import unquote_plus
 
 from playwright.sync_api import sync_playwright
-from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze
+from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze, NO_INTRO
 
 check = Checker()
 
@@ -24,6 +24,7 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     fake = FakeTVmaze()
     ctx = b.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
+    ctx.add_init_script(NO_INTRO)
     fake.attach(ctx)
     pg = ctx.new_page()
     errors = []
@@ -143,6 +144,7 @@ with sync_playwright() as p:
 
     # Tablet sideways for a look.
     ctx = b.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1.5, is_mobile=True, has_touch=True)
+    ctx.add_init_script(NO_INTRO)
     FakeTVmaze().attach(ctx)
     pg = ctx.new_page()
     pg.goto(URL)
