@@ -71,6 +71,15 @@ img.tile { display: block; object-fit: cover; background: var(--surface2); }
 .pick { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); text-align: left; }
 .pick img, .pick-noimg { width: 44px; height: 66px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: var(--surface2); display: flex; align-items: center; justify-content: center; color: var(--muted); }
 .pick-cta { font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.hint { font-size: 12px; color: var(--dim); }
+.grid2[hidden] { display: none; }
+.linked { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 14px; border: 1px solid var(--accent); background: var(--surface); }
+.linked img, .linked .pick-noimg { width: 56px; height: 84px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--surface2); }
+.facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; margin: 0; font-size: 14px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; color: var(--fg); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.next-ep { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--accent-bg); color: var(--accent); font-size: 14px; font-weight: 700; }
+.next-ep svg { flex-shrink: 0; }
 .diary.diary-row { flex-direction: row; gap: 12px; align-items: flex-start; }
 .empty-art { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 12px; color: var(--dim); text-align: center; }
 .seal { flex-shrink: 0; }
@@ -282,9 +291,9 @@ const CHAR_TYPES = ["धूसर नायक", "सब संभालने �
 const TILE_COLORS = ["#2D4A80", "#4B3A73", "#2C5E58", "#6E4C2C", "#3C5577", "#6E3448", "#55602F"];
 const KEY = "abhimanyu-watchlist-v2";
 const OLD_KEY = "abhimanyu-watchlist-done";
-const VERSION = "3.2";
+const VERSION = "3.3";
 // BUILD goes up by one on every live update; docs/version.json must carry the same number.
-const BUILD = 32;
+const BUILD = 33;
 // Which Android shell is running this page: the starter page sets it; 0 means a plain browser.
 const SHELL = (window.WL_SHELL | 0) || (parseInt(new URLSearchParams(location.search).get("shell"), 10) || 0);
 const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
@@ -294,10 +303,26 @@ const TV_API = "https://api.tvmaze.com/";
 const TV_IDS = { suits: 172, hoc: 175, crown: 3594, diplomat: 60213, succession: 23470, narcos: 2705, lincoln: 52910, vikings: 29,
   moneyheist: 27436, guinness: 75496, hotd: 44778, gentlemen: 64992, billions: 3606, bcs: 618, narcosmx: 37787, designated: 8167, ozark: 13417 };
 const TV_BY_NAME = { "peaky blinders": 269, "game of thrones": 82, "breaking bad": 169, "better call saul": 618 };
+// TVmaze words shown in Hindi; anything not listed stays as TVmaze wrote it.
+const GENRE_HI = { Action: "एक्शन", Adventure: "एडवेंचर", Anime: "एनीमे", Children: "बच्चों के लिए", Comedy: "कॉमेडी", Crime: "क्राइम",
+  Drama: "ड्रामा", Espionage: "जासूसी", Family: "पारिवारिक", Fantasy: "फ़ैंटेसी", Food: "खाना", History: "इतिहास", Horror: "हॉरर",
+  Legal: "क़ानूनी", Medical: "मेडिकल", Music: "संगीत", Mystery: "रहस्य", Nature: "प्रकृति", Romance: "रोमांस", "Science-Fiction": "साइंस-फ़िक्शन",
+  Sports: "खेल", Supernatural: "अलौकिक", Thriller: "थ्रिलर", Travel: "यात्रा", War: "युद्ध", Western: "वेस्टर्न" };
+const STATUS_HI = { Running: "अभी चल रही है", Ended: "ख़त्म हो चुकी", "To Be Determined": "आगे का तय नहीं", "In Development": "अभी बन रही है" };
+const LANG_HI = { English: "अंग्रेज़ी", Hindi: "हिंदी", Spanish: "स्पेनिश", Korean: "कोरियाई", Japanese: "जापानी", French: "फ़्रेंच", German: "जर्मन",
+  Turkish: "तुर्की", Italian: "इतालवी", Portuguese: "पुर्तगाली", Danish: "डेनिश", Swedish: "स्वीडिश", Norwegian: "नॉर्वेजियन", Hebrew: "हिब्रू",
+  Arabic: "अरबी", Russian: "रूसी", Chinese: "चीनी", Tamil: "तमिल", Telugu: "तेलुगु", Marathi: "मराठी", Bengali: "बांग्ला", Malayalam: "मलयालम",
+  Kannada: "कन्नड़", Punjabi: "पंजाबी", Urdu: "उर्दू" };
+const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"];
 // The newest APK always sits next to the page, so this link never changes.
 const APK_URL = LIVE_BASE + "watchlist.apk";
 // Shown once in the "क्या नया है" card after the update arrives.
 const CHANGES = {
+  33: [
+    "नई सीरीज़ जोड़ते समय नाम लिखते ही इंटरनेट से सुझाव आएँगे। सही सीरीज़ चुनिए: पोस्टर, चैनल और हर सीज़न के एपिसोड अपने आप भर जाएँगे।",
+    "हर सीरीज़ के विवरण में अब \"जानकारी\" है: साल, चल रही है या ख़त्म, चैनल, शैली, अंक, और अगला एपिसोड कब आएगा।",
+    "अपनी जोड़ी किसी सीरीज़ की गिनती ग़लत हो, तो उसकी \"जानकारी\" में \"सही गिनती लगाएँ\" दबाइए।"
+  ],
   32: [
     "असली पोस्टर: हर सीरीज़ का पोस्टर दिखेगा। एक बार आ जाने के बाद बिना इंटरनेट के भी दिखेगा।",
     "पोस्टर ग़लत लगे या अपनी जोड़ी सीरीज़ का पोस्टर चुनना हो, तो सीरीज़ खोलकर उसके पोस्टर पर दबाइए।",
@@ -339,6 +364,7 @@ function loadState(s) {
     if (typeof c.name !== "string" || !c.name.trim()) { delete s.custom[id]; continue; }
     if (!c.epsText && typeof c.eps === "string") c.epsText = c.eps; // series added in version 1.1
     if (!Array.isArray(c.seasons) || !c.seasons.every(n => Number.isInteger(n) && n > 0)) c.seasons = null;
+    if (c.labels != null && !(c.seasons && Array.isArray(c.labels) && c.labels.length === c.seasons.length && c.labels.every(x => typeof x === "string"))) delete c.labels;
     s.custom[id] = c;
   }
   s.removed = Array.isArray(s.removed) ? s.removed : [];
@@ -653,9 +679,10 @@ async function fetchPosters() {
       if (tv === 0) continue;
       if (tv == null) {
         const m = await autoMatch(id);
-        if (!m) continue;
+        if (!m) { refreshInfo(id); continue; }
         tv = m.tv; img = m.img;
         state.tv[id] = tv; save();
+        refreshInfo(id);
       }
       if (lsGet("wl-poster:" + tv) || posterFailed.has(tv)) continue;
       if (await loadPoster(tv, img)) refreshPosters(id);
@@ -672,11 +699,7 @@ async function posterSearch(id, q) {
   try {
     const r = await fetch(TV_API + "search/shows?q=" + encodeURIComponent(q));
     if (!r.ok) throw new Error("http " + r.status);
-    ui.posterResults = (await r.json()).map(x => x && x.show).filter(Boolean).slice(0, 6).map(sh => ({
-      tv: sh.id, name: sh.name || "", year: (sh.premiered || "").slice(0, 4),
-      net: (sh.network && sh.network.name) || (sh.webChannel && sh.webChannel.name) || "",
-      img: sh.image && (sh.image.medium || sh.image.original)
-    }));
+    ui.posterResults = (await r.json()).map(x => x && x.show).filter(sh => sh && sh.id).slice(0, 6).map(showPick);
     ui.posterMsg = ui.posterResults.length ? "" : "इस नाम से कुछ नहीं मिला। सीरीज़ का अंग्रेज़ी नाम लिखकर देखिए।";
   } catch (e) {
     ui.posterMsg = "अभी पोस्टर नहीं ढूँढ पाया। इंटरनेट चालू करके फिर कोशिश कीजिए।";
@@ -697,6 +720,140 @@ function resetPoster(id) {
   ui.panel = null;
   change(() => { delete state.tv[id]; }, "ऐप वाला पोस्टर वापस");
   fetchPosters();
+}
+
+/* ---------- Series info from TVmaze ----------
+   One call per show (/shows/:id with its episodes and next episode embedded). The result is kept in this device's
+   storage as wl-info:<tvmaze id>, so it shows without internet too, and is refreshed when older than three days.
+   Like posters, it is not part of the backup code. */
+const INFO_TTL = 3 * 864e5;
+const infoBusy = new Map();
+const infoMiss = new Map();
+function showPick(sh) {
+  return { tv: sh.id, name: sh.name || "", year: (sh.premiered || "").slice(0, 4),
+    net: (sh.network && sh.network.name) || (sh.webChannel && sh.webChannel.name) || "",
+    img: sh.image && (sh.image.medium || sh.image.original), lang: sh.language || "" };
+}
+function infoOf(tv) {
+  if (!tv) return null;
+  try { const j = JSON.parse(lsGet("wl-info:" + tv) || "null"); return j && j.v === 1 && Array.isArray(j.seasons) ? j : null; } catch (e) { return null; }
+}
+function infoFromShow(sh) {
+  const eps = (sh._embedded && Array.isArray(sh._embedded.episodes)) ? sh._embedded.episodes : [];
+  const per = new Map();
+  for (const e of eps) {
+    if (!e || !Number.isInteger(e.season) || e.season < 1 || !Number.isInteger(e.number) || (e.type && e.type !== "regular")) continue;
+    per.set(e.season, (per.get(e.season) || 0) + 1);
+  }
+  const nums = [...per.keys()].sort((a, b) => a - b);
+  const nx = sh._embedded && sh._embedded.nextepisode;
+  return { v: 1, t: Date.now(), tv: sh.id, name: sh.name || "", url: typeof sh.url === "string" && sh.url.startsWith("https://www.tvmaze.com/") ? sh.url : "",
+    from: (sh.premiered || "").slice(0, 4), to: (sh.ended || "").slice(0, 4), status: sh.status || "",
+    net: (sh.network && sh.network.name) || (sh.webChannel && sh.webChannel.name) || "", lang: sh.language || "",
+    genres: Array.isArray(sh.genres) ? sh.genres.filter(g => typeof g === "string").slice(0, 4) : [],
+    rating: sh.rating && typeof sh.rating.average === "number" ? sh.rating.average : null,
+    runtime: sh.averageRuntime || sh.runtime || null,
+    seasons: nums.map(n => per.get(n)),
+    // Seasons TVmaze numbers 1, 3, 4 (two parts joined) keep their own numbers as labels.
+    labels: nums.some((n, i) => n !== i + 1) ? nums.map(n => "सीज़न " + n) : null,
+    next: nx && /^\d{4}-\d{2}-\d{2}$/.test(nx.airdate || "") ? { d: nx.airdate, s: nx.season, e: nx.number } : null };
+}
+function fetchInfo(tv, force) {
+  const have = infoOf(tv);
+  if (!tv || (have && !force && Date.now() - have.t < INFO_TTL)) return Promise.resolve(have);
+  if (infoBusy.has(tv)) return infoBusy.get(tv);
+  const job = (async () => {
+    try {
+      const r = await fetch(TV_API + "shows/" + tv + "?embed[]=episodes&embed[]=nextepisode");
+      if (!r.ok) throw new Error("http " + r.status);
+      const info = infoFromShow(await r.json());
+      lsSet("wl-info:" + tv, JSON.stringify(info));
+      infoMiss.delete(tv);
+      return info;
+    } catch (e) { infoMiss.set(tv, Date.now()); return have; }
+    finally { infoBusy.delete(tv); }
+  })();
+  infoBusy.set(tv, job);
+  return job;
+}
+// Called while drawing the info section: start a fetch when there is nothing yet, or it is old. A failed try waits a minute.
+function ensureInfo(id) {
+  const tv = tvIdOf(id);
+  if (!tv || infoBusy.has(tv)) return;
+  const have = infoOf(tv);
+  if (have && Date.now() - have.t < INFO_TTL) return;
+  const miss = infoMiss.get(tv);
+  if (miss && Date.now() - miss < 60000) return;
+  fetchInfo(tv).then(() => refreshInfo(id));
+}
+function refreshInfo(id) {
+  document.querySelectorAll('[data-info="' + id + '"]').forEach(el => el.replaceWith(infoSection(id)));
+}
+function yearsText(i) {
+  if (!i.from) return "";
+  if (i.to) return i.to === i.from ? i.from : i.from + " – " + i.to;
+  return i.status === "Running" ? i.from + " से अब तक" : i.from;
+}
+function countText(se) { return se.length + " सीज़न · " + se.reduce((a, b) => a + b, 0) + " एपिसोड"; }
+function dayDiff(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+  if (!m) return null;
+  const t = new Date(); t.setHours(0, 0, 0, 0);
+  return Math.round((new Date(+m[1], +m[2] - 1, +m[3]) - t) / 864e5);
+}
+function dateHi(iso) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ""); return m ? Number(m[3]) + " " + MONTHS_HI[+m[2] - 1] + " " + m[1] : ""; }
+// A series that is already in one of the lists and points at this TVmaze show.
+function seriesWithTv(tv) { return [].concat(...LISTS.map(L => state.layout[L])).find(id => base(id) && tvIdOf(id) === tv) || null; }
+function fixCounts(id, info) {
+  change(() => {
+    const c = state.custom[id];
+    c.seasons = info.seasons.slice();
+    if (info.labels) c.labels = info.labels.slice(); else delete c.labels;
+    c.epsText = "";
+  }, "एपिसोड की गिनती ठीक कर दी");
+}
+function infoSection(id) {
+  const tv = tvIdOf(id);
+  ensureInfo(id);
+  const info = infoOf(tv);
+  const sec = h("section", { class: "card", style: "border-radius:20px;padding:16px;gap:12px", "aria-label": "जानकारी", "data-info": id },
+    h("div", { class: "split" }, h("h2", { class: "section-title", style: "color:var(--fg)", text: "जानकारी" }),
+      info && info.url ? h("a", { href: info.url, style: "color:var(--accent);font-size:13px" }, "TVmaze पर देखें") : h("span", { class: "meta", text: "TVmaze से" })));
+  if (!info) {
+    let msg = "", retry = false;
+    if (tv === 0) msg = "आपने पोस्टर हटा दिया है, इसलिए यह सीरीज़ इंटरनेट से नहीं जुड़ी। ऊपर पोस्टर पर दबाकर सही सीरीज़ चुनेंगे, तो जानकारी आ जाएगी।";
+    else if (!tv) msg = state.custom[id] && !noMatch.has(id) ? "जानकारी ढूँढ रहा हूँ…" : "इंटरनेट पर इस नाम की सीरीज़ नहीं मिली। ऊपर पोस्टर पर दबाकर सही सीरीज़ चुनिए, जानकारी अपने आप आ जाएगी।";
+    else if (infoBusy.has(tv)) msg = "जानकारी आ रही है…";
+    else { msg = "जानकारी के लिए इंटरनेट चाहिए। इंटरनेट चालू करके फिर कोशिश कीजिए।"; retry = true; }
+    sec.append(h("p", { class: "meta", style: "font-size:14px", text: msg }));
+    if (retry) sec.append(h("button", { class: "btn", type: "button", style: "align-self:flex-start", onclick: () => { infoMiss.delete(tv); fetchInfo(tv, true).then(() => refreshInfo(id)); refreshInfo(id); } }, "फिर कोशिश करें"));
+    return sec;
+  }
+  const rows = [
+    ["साल", yearsText(info)],
+    ["स्थिति", STATUS_HI[info.status] || info.status],
+    ["चैनल", info.net],
+    ["मूल भाषा", LANG_HI[info.lang] || info.lang],
+    ["हर एपिसोड", info.runtime ? "लगभग " + info.runtime + " मिनट" : ""],
+    ["TVmaze पर अंक", info.rating != null ? info.rating.toFixed(1) + " / 10" : ""],
+    ["कुल", info.seasons.length ? countText(info.seasons) : ""]
+  ].filter(r => r[1]);
+  sec.append(h("dl", { class: "facts" }, rows.flatMap(([k, v]) => [h("dt", { text: k }), h("dd", { text: v })])));
+  if (info.genres.length) sec.append(h("div", { class: "chips", style: "gap:6px" }, info.genres.map(g => h("span", { class: "tag", text: GENRE_HI[g] || g }))));
+  const days = info.next ? dayDiff(info.next.d) : null;
+  if (days != null && days >= 0) {
+    const when = days === 0 ? "आज" : days === 1 ? "कल" : days + " दिन बाद";
+    sec.append(h("div", { class: "next-ep" }, icon("cal", 20), h("span", { text: "अगला एपिसोड: सीज़न " + info.next.s + ", एपिसोड " + info.next.e + " · " + dateHi(info.next.d) + " (" + when + ")" })));
+  } else if (info.status === "Running") sec.append(h("p", { class: "meta", style: "font-size:14px", text: "अगले एपिसोड की तारीख़ अभी तय नहीं हुई।" }));
+  // Own series only: offer TVmaze's exact episode counts when the list has different ones.
+  const c = state.custom[id];
+  if (c && info.seasons.length && JSON.stringify(info.seasons) !== JSON.stringify(c.seasons || null)) {
+    const mine = c.seasons ? countText(c.seasons) : (c.epsText || "गिनती नहीं लिखी");
+    sec.append(h("div", { class: "panel" },
+      h("p", { style: "font-size:14px", text: "आपकी सूची में: " + mine + "। TVmaze पर: " + countText(info.seasons) + "।" }),
+      h("button", { class: "btn primary", type: "button", style: "align-self:flex-start", onclick: () => fixCounts(id, info) }, "सही गिनती लगाएँ")));
+  }
+  return sec;
 }
 
 /* ---------- The brass seal ---------- */
@@ -920,7 +1077,7 @@ function renderNow() {
       h("span", { class: "eyebrow", text: "मुख्य सूची पूरी" }),
       h("h2", { class: "title sm", text: "सब देख लीं!" }),
       h("p", { class: "meta", text: "नई सीरीज़ जोड़िए, या \"हिंदी मिले तो देखें\" वाली सूची से कोई मुख्य क्रम में लाइए।" }),
-      h("button", { class: "btn primary big", type: "button", onclick: () => go("add") }, icon("plus", 22), "नई सीरीज़ जोड़ें")));
+      h("button", { class: "btn primary big", type: "button", onclick: () => { ui.add = null; go("add"); } }, icon("plus", 22), "नई सीरीज़ जोड़ें")));
   } else {
     const se = seasonsOf(cur); const w = watchedEps(cur); const t = totalEps(cur);
     const card = h("section", { class: "card", "aria-label": "अभी देख रहे हैं" },
@@ -1142,6 +1299,7 @@ function renderDetail(id, inPane) {
     tracker.append(h("button", { class: "btn wide", type: "button", onclick: () => unfinish(id) }, "फिर से सूची में डालें"));
   }
   body.append(tracker);
+  body.append(infoSection(id));
 
   // Characters
   const charSec = h("section", { class: "col", style: "gap:10px" }, h("h2", { class: "section-title", text: "पसंदीदा किरदार" }));
@@ -1222,24 +1380,124 @@ function renderDetail(id, inPane) {
   acts.hidden = false;
 }
 
+/* The add form keeps what was typed in ui.add, so a redraw (an update notice arriving, turning the tablet) loses nothing.
+   Typing a name searches TVmaze; picking a result links the series, which fills in the channel and exact episode counts. */
+let addSeq = 0, addTimer = null, drawAdd = () => {};
+function newAddDraft() { return { name: "", where: "", whereAuto: false, seasons: "", eps: "", hindi: "check", place: null, why: "", link: null, results: [], msg: "" }; }
+async function addSearch(A, q) {
+  const my = ++addSeq;
+  A.msg = "इंटरनेट पर ढूँढ रहा हूँ…"; A.results = [];
+  drawAdd();
+  let results = [], msg = "";
+  try {
+    const r = await fetch(TV_API + "search/shows?q=" + encodeURIComponent(q));
+    if (!r.ok) throw new Error("http " + r.status);
+    results = (await r.json()).map(x => x && x.show).filter(sh => sh && sh.id).slice(0, 5).map(showPick);
+    if (!results.length) msg = "इंटरनेट पर इस नाम की सीरीज़ नहीं मिली। अंग्रेज़ी नाम लिखकर देखिए, या बाक़ी जानकारी ख़ुद भर दीजिए।";
+  } catch (e) {
+    msg = "इंटरनेट नहीं मिला, इसलिए सुझाव नहीं आए। बाक़ी जानकारी ख़ुद भर दीजिए।";
+  }
+  if (my !== addSeq || ui.add !== A || A.link) return;
+  A.results = results; A.msg = msg;
+  drawAdd();
+}
 function renderAdd() {
   const el = document.getElementById("scr-add");
+  const A = ui.add || (ui.add = newAddDraft());
   const head = h("header", { class: "head small" },
     h("button", { class: "icon-btn bare", type: "button", "aria-label": "वापस", onclick: back }, icon("back", 24)),
     h("h1", { class: "title sm", text: "नई सीरीज़ जोड़ें" }));
-  const name = h("input", { id: "add-name", type: "text", autocomplete: "off", placeholder: "जैसे Billions" });
-  const where = h("input", { id: "add-where", type: "text", autocomplete: "off", placeholder: "जैसे Netflix" });
-  const sc = h("input", { id: "add-seasons", type: "number", inputmode: "numeric", min: "1", max: "40", placeholder: "जैसे 5" });
-  const ep = h("input", { id: "add-eps", type: "number", inputmode: "numeric", min: "1", max: "100", placeholder: "जैसे 10" });
+  const name = h("input", { id: "add-name", type: "text", autocomplete: "off", placeholder: "जैसे Billions", value: A.name });
+  const sugg = h("div", { id: "add-sugg", class: "col", style: "gap:8px", "aria-live": "polite" });
+  const linkBox = h("div", { id: "add-link" });
+  const where = h("input", { id: "add-where", type: "text", autocomplete: "off", placeholder: "जैसे Netflix", value: A.where });
+  const sc = h("input", { id: "add-seasons", type: "number", inputmode: "numeric", min: "1", max: "40", placeholder: "जैसे 5", value: A.seasons });
+  const ep = h("input", { id: "add-eps", type: "number", inputmode: "numeric", min: "1", max: "100", placeholder: "जैसे 10", value: A.eps });
+  const counts = h("div", { class: "grid2", id: "add-counts" }, h("label", { class: "field", for: "add-seasons" }, "कितने सीज़न", sc), h("label", { class: "field", for: "add-eps" }, "हर सीज़न में एपिसोड (लगभग)", ep));
   const hi = h("select", { id: "add-hindi" }, ["ok", "likely", "check"].map(k => h("option", { value: k, text: H[k] })));
-  hi.value = "check";
-  const pl = placeSelect("add-place", null, lastMainPlace());
+  hi.value = A.hindi;
+  const pl = placeSelect("add-place", null, A.place || lastMainPlace());
   const why = h("textarea", { id: "add-why", placeholder: "एक लाइन, जैसे: हार्वी जैसा करिश्माई किरदार" });
+  why.value = A.why;
   const err = h("p", { class: "err", text: "सीरीज़ का नाम लिखिए।", hidden: true });
+
+  function pick(r) {
+    clearTimeout(addTimer); addSeq++;
+    A.link = Object.assign({}, r, { info: infoOf(r.tv), loading: true, manual: false });
+    A.name = name.value = r.name;
+    if (r.net && (!A.where.trim() || A.whereAuto)) { A.where = where.value = r.net; A.whereAuto = true; }
+    if (r.lang === "Hindi" && A.hindi === "check") A.hindi = hi.value = "ok";
+    A.results = []; A.msg = "";
+    drawAdd();
+    loadPoster(r.tv, r.img);
+    fetchInfo(r.tv, true).then(info => {
+      if (ui.add !== A || !A.link || A.link.tv !== r.tv) return;
+      A.link.info = info; A.link.loading = false;
+      drawAdd();
+    });
+  }
+  function unlink() {
+    A.link = null;
+    if (A.whereAuto) { A.where = where.value = ""; A.whereAuto = false; }
+    const q = name.value.trim();
+    if (q.length >= 2) addSearch(A, q); else drawAdd();
+    name.focus();
+  }
+  function draw() {
+    sugg.replaceChildren(...[
+      A.msg ? h("p", { class: "meta", style: "font-size:14px", text: A.msg }) : null,
+      A.results.length ? h("div", { class: "picks", "aria-label": "इंटरनेट से सुझाव" }, A.results.map(r => h("button", { class: "pick", type: "button", onclick: () => pick(r) },
+        r.img ? h("img", { src: r.img, alt: "", loading: "lazy" }) : h("span", { class: "pick-noimg", "aria-hidden": "true" }, "?"),
+        h("span", { class: "col", style: "gap:2px;flex:1;min-width:0" }, h("b", { text: r.name }), h("span", { class: "meta", text: [r.year, r.net].filter(Boolean).join(" · ") })),
+        h("span", { class: "pick-cta", text: "यही है" })))) : null].filter(Boolean));
+    sugg.style.display = A.msg || A.results.length ? "" : "none";
+    const L = A.link;
+    const exact = L && L.info && L.info.seasons.length ? L.info : null;
+    linkBox.replaceChildren();
+    if (L) {
+      const dupe = seriesWithTv(L.tv);
+      const line = L.manual ? "एपिसोड की गिनती नीचे आप ख़ुद लिखेंगे।"
+        : exact ? countText(exact.seasons) + (exact.seasons.length > 1 ? " (" + exact.seasons.join(", ") + ")" : "")
+        : L.loading ? "एपिसोड गिन रहा हूँ…" : "इंटरनेट पर एपिसोड की गिनती नहीं मिली। नीचे ख़ुद लिख दीजिए।";
+      linkBox.append(h("div", { class: "linked" },
+        L.img ? h("img", { src: L.img, alt: "" }) : h("span", { class: "pick-noimg", "aria-hidden": "true" }, "?"),
+        h("div", { class: "col", style: "gap:4px;flex:1;min-width:0" },
+          h("span", { class: "eyebrow", text: "इंटरनेट से जुड़ गई" }),
+          h("b", { style: "font-size:16px", text: L.name }),
+          h("span", { class: "meta", text: [exact ? yearsText(exact) : L.year, L.net].filter(Boolean).join(" · ") }),
+          h("span", { style: "font-size:14px", text: line }),
+          dupe ? h("span", { style: "font-size:13px;color:var(--warn)", text: "ध्यान दें: “" + base(dupe).name + "” आपकी सूची में पहले से है।" }) : null,
+          h("div", { class: "actions", style: "margin-top:4px" },
+            h("button", { class: "btn", type: "button", onclick: unlink }, "यह नहीं"),
+            exact ? h("button", { class: "link", type: "button", onclick: () => { L.manual = !L.manual; drawAdd(); if (L.manual) sc.focus(); } }, L.manual ? "इंटरनेट वाली गिनती लें" : "गिनती ख़ुद लिखें") : null))));
+    }
+    linkBox.style.display = L ? "" : "none";
+    counts.hidden = Boolean(L && !L.manual && (exact || L.loading));
+  }
+  drawAdd = draw;
+
+  name.addEventListener("input", () => {
+    A.name = name.value;
+    const q = name.value.trim();
+    if (A.link && q !== A.link.name) A.link = null;
+    clearTimeout(addTimer);
+    if (A.link || q.length < 2) { addSeq++; A.results = []; A.msg = ""; drawAdd(); return; }
+    addTimer = setTimeout(() => addSearch(A, q), 550);
+    drawAdd();
+  });
+  where.addEventListener("input", () => { A.where = where.value; A.whereAuto = false; });
+  sc.addEventListener("input", () => { A.seasons = sc.value; });
+  ep.addEventListener("input", () => { A.eps = ep.value; });
+  hi.addEventListener("change", () => { A.hindi = hi.value; });
+  pl.addEventListener("change", () => { A.place = pl.value; });
+  why.addEventListener("input", () => { A.why = why.value; });
+
   const form = h("form", { class: "body", novalidate: true },
-    h("label", { class: "field", for: "add-name" }, "सीरीज़ का नाम *", name), err,
+    h("label", { class: "field", for: "add-name" }, "सीरीज़ का नाम *", name),
+    h("p", { class: "hint", style: "margin-top:-6px", text: "नाम लिखते ही इंटरनेट से सुझाव आएँगे। सही सीरीज़ चुनिए, पोस्टर, चैनल और एपिसोड अपने आप भर जाएँगे।" }),
+    err, sugg, linkBox,
     h("label", { class: "field", for: "add-where" }, "कहाँ है", where),
-    h("div", { class: "grid2" }, h("label", { class: "field", for: "add-seasons" }, "कितने सीज़न", sc), h("label", { class: "field", for: "add-eps" }, "हर सीज़न में एपिसोड (लगभग)", ep)),
+    counts,
     h("div", { class: "grid2" }, h("label", { class: "field", for: "add-hindi" }, "हिंदी", hi), h("label", { class: "field", for: "add-place" }, "कहाँ रखें", pl)),
     h("label", { class: "field", for: "add-why" }, "क्यों देखनी है (चाहें तो)", why),
     h("button", { class: "btn primary big", type: "submit", style: "font-size:17px;min-height:52px" }, "जोड़ें"));
@@ -1247,20 +1505,29 @@ function renderAdd() {
     e.preventDefault();
     const n = name.value.trim();
     if (!n) { err.hidden = false; name.focus(); return; }
+    const L = A.link;
+    const exact = L && !L.manual && L.info && L.info.seasons.length ? L.info : null;
     const sCount = Math.min(40, Math.max(0, parseInt(sc.value, 10) || 0));
     const eCount = Math.min(100, Math.max(0, parseInt(ep.value, 10) || 0));
     const id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
     const target = pl.value;
+    clearTimeout(addTimer); addSeq++;
+    ui.add = null;
     change(() => {
       state.custom[id] = { name: n, where: where.value.trim(), hindi: hi.value, why: why.value.trim(),
-        seasons: sCount && eCount ? Array(sCount).fill(eCount) : null, epsText: sCount && !eCount ? sCount + " सीज़न" : "" };
+        seasons: exact ? exact.seasons.slice() : (sCount && eCount ? Array(sCount).fill(eCount) : null),
+        epsText: exact ? "" : (sCount && !eCount ? sCount + " सीज़न" : "") };
+      if (exact && exact.labels) state.custom[id].labels = exact.labels.slice();
+      if (L) state.tv[id] = L.tv;
       place(id, target);
     }, null);
     tabGo("queue");
     snack("“" + n + "” जुड़ गई", true);
+    if (L) loadPoster(L.tv, L.img).then(ok => { if (ok) refreshPosters(id); });
     setTimeout(fetchPosters, 300);
   });
   el.replaceChildren(head, form);
+  draw();
 }
 
 function renderUpdateCard() {
@@ -1377,7 +1644,7 @@ function renderTabs(active) {
   nav.hidden = !isMedium() && !TABS.includes(screen);
   const tab = (id, label, ic) => h("button", { class: "tab", type: "button", "aria-current": active === id ? "page" : null, onclick: () => tabGo(id) }, h("span", { class: "ind" }, icon(ic, 24)), label);
   nav.replaceChildren(
-    h("button", { class: "fab", type: "button", "aria-label": "नई सीरीज़ जोड़ें", onclick: () => { if (screen !== "add") go("add"); } }, icon("plus", 26)),
+    h("button", { class: "fab", type: "button", "aria-label": "नई सीरीज़ जोड़ें", onclick: () => { if (screen !== "add") { ui.add = null; go("add"); } } }, icon("plus", 26)),
     tab("now", "अभी", "play"), tab("queue", "सूची", "list"), tab("finished", "देख लीं", "star"),
     h("button", { class: "tab settings", type: "button", "aria-current": active === "settings" ? "page" : null, onclick: () => { if (screen !== "settings") go("settings"); } }, h("span", { class: "ind" + (backupDue() ? " has-dot" : "") }, icon("gear", 24)), "सेटिंग"));
 }

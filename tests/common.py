@@ -56,12 +56,17 @@ class Checker:
 
 # ---------- Fake TVmaze (the real one is not reachable from test machines) ----------
 import io
+from datetime import date, timedelta
 from urllib.parse import urlparse, parse_qs
 
 TV_NAMES = {172: "Suits", 175: "House of Cards", 3594: "The Crown", 60213: "The Diplomat", 23470: "Succession", 2705: "Narcos",
             52910: "The Lincoln Lawyer", 29: "Vikings", 27436: "La Casa de Papel", 75496: "House of Guinness", 44778: "House of the Dragon",
             64992: "The Gentlemen", 3606: "Billions", 618: "Better Call Saul", 37787: "Narcos: Mexico", 8167: "Designated Survivor",
             13417: "Ozark", 269: "Peaky Blinders", 82: "Game of Thrones", 169: "Breaking Bad"}
+# Made-up episode counts per TVmaze season number. 27436 skips season 2, as the real TVmaze listing does.
+TV_SEASONS = {172: {n + 1: c for n, c in enumerate([12, 16, 16, 16, 16, 16, 16, 16, 10])}, 44778: {1: 10, 2: 8, 3: 8},
+              27436: {1: 15, 3: 8, 4: 8, 5: 10}, 269: {n: 6 for n in range(1, 7)}}
+RUNNING = {44778}  # has a next episode five days from today
 PALETTE = [(36, 60, 110), (92, 52, 40), (40, 84, 76), (88, 44, 70), (70, 76, 40), (48, 48, 92), (100, 70, 30)]
 
 
@@ -108,6 +113,24 @@ class FakeTVmaze:
         return {"id": tv, "name": name, "premiered": year + "-01-01", "network": {"name": "Netflix"},
                 "image": {"medium": f"https://static.tvmaze.com/fake/{tv}.jpg", "original": f"https://static.tvmaze.com/fake/{tv}.jpg"}}
 
+    def _details(self, tv, embed):
+        d = self._show(tv, TV_NAMES.get(tv, f"Show {tv}"), "2011")
+        running = tv in RUNNING
+        d.update({"url": f"https://www.tvmaze.com/shows/{tv}/fake", "status": "Running" if running else "Ended",
+                  "ended": None if running else "2019-09-25", "language": "English",
+                  "genres": ["Drama", "Legal"] if tv == 172 else ["Drama", "Crime"], "averageRuntime": 45, "rating": {"average": 8.1}})
+        emb = {}
+        if "episodes" in embed:
+            seasons = TV_SEASONS.get(tv) or {1: 8 + tv % 3, 2: 10, 3: 10}
+            eps = [{"season": sn, "number": k + 1, "type": "regular", "airdate": "2015-01-01"} for sn, c in sorted(seasons.items()) for k in range(c)]
+            eps.append({"season": 1, "number": None, "type": "significant_special", "airdate": "2015-06-01"})  # specials are not counted
+            emb["episodes"] = eps
+        if "nextepisode" in embed and running:
+            emb["nextepisode"] = {"airdate": (date.today() + timedelta(days=5)).isoformat(), "season": 3, "number": 1}
+        if emb:
+            d["_embedded"] = emb
+        return d
+
     def _api(self, route):
         if self.offline:
             return route.abort()
@@ -116,7 +139,9 @@ class FakeTVmaze:
         hdr = {"Access-Control-Allow-Origin": "*", "Content-Type": "application/json"}
         if u.path.startswith("/shows/"):
             tv = int(u.path.split("/")[2])
-            return route.fulfill(status=200, headers=hdr, body=json.dumps(self._show(tv, TV_NAMES.get(tv, f"Show {tv}"))))
+            qs = parse_qs(u.query)
+            embed = qs.get("embed[]", []) + qs.get("embed", [])
+            return route.fulfill(status=200, headers=hdr, body=json.dumps(self._details(tv, embed)))
         if u.path == "/search/shows":
             q = parse_qs(u.query).get("q", [""])[0].strip()
             exact = [tv for tv, n in TV_NAMES.items() if n.lower() == q.lower()]

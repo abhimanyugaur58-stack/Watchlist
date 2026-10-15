@@ -3,6 +3,7 @@ import base64
 import json
 import sys
 import time
+from urllib.parse import unquote_plus
 
 from playwright.sync_api import sync_playwright
 from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze
@@ -49,7 +50,8 @@ with sync_playwright() as p:
     size = len(ls("wl-poster:172"))
     check(1000 < size < 80000, f"poster stored at a small size ({size} chars)")
     check(all(c.startswith("/shows/") or c.startswith("/search/") for c in fake.api_calls), "only show and search calls")
-    check(not any(c.startswith("/search/") for c in fake.api_calls), "no searching needed for known series")
+    typed = [unquote_plus(c) for c in fake.api_calls if c.startswith("/search/")]
+    check(all(c.endswith("आधा लिखा नाम") for c in typed), "no searching needed for known series (only the typed name)")
     pg.screenshot(path=str(OUT / "p01-now.png"))
 
     # Restart offline: posters still there, no network needed.
