@@ -48,6 +48,7 @@ Only for shell changes: permissions, icon, app name, or native code in `smali/`.
 
 ## Session limits seen so far
 
+- Claude can push to `main` and push new branches, but cannot delete a branch on GitHub, call the Pages settings API or create releases. The leftover branch `signature-3.4` is already in `main` and can be deleted by Abhimanyu any time.
 - Claude can push to `main`, but cannot call the Pages settings API or create releases. Changing those settings is a job for Abhimanyu in the GitHub website.
 - GitHub Pages is on: branch `main`, folder `/docs` (set by Abhimanyu on 13 Oct 2026).
 - Two checks each failed once on the first full run after a pause and passed on every rerun (about 20 runs): test_tablet "finished list + Peaky detail" and test_info "own series: count fixing offered". Cause not found; both now print a DEBUG line with the page state if they fail. If one fails, rerun before digging, and read the DEBUG line.
