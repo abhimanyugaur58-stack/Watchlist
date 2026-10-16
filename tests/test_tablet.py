@@ -66,9 +66,11 @@ with sync_playwright() as p:
     check("narcos" in st()["layout"]["main"], "landscape: undo delete")
     # finished side by side
     pg.click("#tabs .tab >> text=देख लीं")
-    check(vis("#scr-finished") and vis("#detail-pane") and "Peaky Blinders" in pg.inner_text("#scr-detail"), "landscape: finished list + Peaky detail")
-    if not vis("#scr-finished"):  # failed once on a cold first run (15 Oct 2026); this line shows the state if it happens again
-        print("DEBUG", pg.evaluate("[screen, JSON.stringify(history.state), pendingTab, document.getElementById('scr-finished').innerHTML.length]"), errors)
+    ok = vis("#scr-finished") and vis("#detail-pane") and "Peaky Blinders" in pg.inner_text("#scr-detail")
+    check(ok, "landscape: finished list + Peaky detail")
+    if not ok:  # fails now and then on a cold run (15 and 16 Oct 2026); this line shows the state if it happens again
+        print("DEBUG", pg.evaluate("[screen, JSON.stringify(history.state), pendingTab, detailId, document.getElementById('scr-finished').innerText.slice(0, 300), "
+                                   "(document.querySelector('#scr-detail h1') || {}).innerText, !document.getElementById('snack').hidden]"), errors)
     pg.click("#scr-finished .diary-name >> text=Game of Thrones")
     check("Game of Thrones" in pg.inner_text("#scr-detail h1"), "landscape: diary pick swaps pane")
     pg.screenshot(path=S + "t06-landscape-finished.png")

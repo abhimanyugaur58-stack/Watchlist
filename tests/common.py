@@ -34,9 +34,19 @@ FIXTURE = {
 
 
 def load_fixture(page, url=APP_URL):
-    page.goto(url)
-    page.evaluate("([k, s]) => { localStorage.clear(); localStorage.setItem(k, JSON.stringify(s)); }", [KEY, FIXTURE])
-    page.goto(url)
+    """Saves FIXTURE and opens the app on it, then checks the app really read it.
+
+    On a cold first run Chromium sometimes hands the next page the list saved before (seen 16 Oct 2026: the app
+    then starts empty and saves that over the fixture), so this tries again a few times.
+    """
+    for attempt in range(4):
+        page.goto(url)
+        page.evaluate("([k, s]) => { localStorage.clear(); localStorage.setItem(k, JSON.stringify(s)); }", [KEY, FIXTURE])
+        page.goto(url)
+        if page.evaluate("k => { try { return JSON.parse(localStorage.getItem(k)).done.includes('peaky'); } catch (e) { return false; } }", KEY):
+            return
+        print("NOTE the app did not pick up the test list on try", attempt + 1)
+    raise RuntimeError("the app never picked up the test list")
 
 
 class Checker:
@@ -64,7 +74,7 @@ from urllib.parse import urlparse, parse_qs
 TV_NAMES = {172: "Suits", 175: "House of Cards", 3594: "The Crown", 60213: "The Diplomat", 23470: "Succession", 2705: "Narcos",
             52910: "The Lincoln Lawyer", 29: "Vikings", 27436: "La Casa de Papel", 75496: "House of Guinness", 44778: "House of the Dragon",
             64992: "The Gentlemen", 3606: "Billions", 618: "Better Call Saul", 37787: "Narcos: Mexico", 8167: "Designated Survivor",
-            13417: "Ozark", 269: "Peaky Blinders", 82: "Game of Thrones", 169: "Breaking Bad"}
+            13417: "Ozark", 66447: "Queenmaker", 52656: "Vincenzo", 269: "Peaky Blinders", 82: "Game of Thrones", 169: "Breaking Bad"}
 # Made-up episode counts per TVmaze season number. 27436 skips season 2, as the real TVmaze listing does.
 TV_SEASONS = {172: {n + 1: c for n, c in enumerate([12, 16, 16, 16, 16, 16, 16, 16, 10])}, 44778: {1: 10, 2: 8, 3: 8},
               27436: {1: 15, 3: 8, 4: 8, 5: 10}, 269: {n: 6 for n in range(1, 7)}}

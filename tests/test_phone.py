@@ -78,7 +78,7 @@ with sync_playwright() as p:
     pg.click("nav#tabs >> text=सूची")
     pg.screenshot(path=SHOTS + "06-queue.png", full_page=False)
     q = txt("#scr-queue")
-    check("1 / 12 पूरी" in q, "queue header 1/12 (Ozark joined the main order in 3.5)")
+    check("1 / 14 पूरी" in q, "queue header 1/14 (Queenmaker and Vincenzo joined in 3.6)")
     pg.click("#scr-queue .fchip >> text=JioHotstar")
     q = txt("#scr-queue")
     check("Succession" in q and "Narcos" not in q, "JioHotstar filter")
@@ -110,7 +110,7 @@ with sync_playwright() as p:
     pg.click("#scr-detail .panel button.primary")
     s = st(); check(s["layout"]["main"][0] == "vikings", "moved Vikings to first")
     pg.click("#snack-undo")
-    s = st(); check(s["layout"]["main"].index("vikings") == 8, "undo move (Ozark sits before Vikings since 3.5)")
+    s = st(); check(s["layout"]["main"].index("vikings") == 10, "undo move (3.6 order: Vikings is 11th)")
     # Hindi change
     pg.click("#detail-actions >> text=हिंदी बदलें")
     pg.select_option("#hindi-vikings", "check")
@@ -201,40 +201,68 @@ with sync_playwright() as p:
     check("The Gentlemen" in f and "Peaky" not in f, "diary has gentlemen only")
     pg.screenshot(path=SHOTS + "10-finished-migrated.png", full_page=True)
 
-    # ---- 3.5: Ozark (Hindi found) leaves "हिंदी मिले तो देखें" for the main order, right after Narcos, once
+    # ---- 3.5: Ozark (Hindi found) leaves "हिंदी मिले तो देखें". 3.6 then sets the new middle of the main order, once:
+    # The Diplomat → Queenmaker → Succession → Ozark → Vincenzo → Narcos
+    NEW_MID = ["diplomat", "queenmaker", "succession", "ozark", "vincenzo", "narcos", "lincoln"]
     def saved(s):
         pg.evaluate("s => { localStorage.clear(); localStorage.setItem('abhimanyu-watchlist-v2', JSON.stringify(s)); }", s)
         pg.reload()
         return st()
-    old34 = json.loads(json.dumps(FIXTURE)); old34["hindi"] = {"ozark": "likely"}
+    def in_order(m, ids):
+        if not all(i in m for i in ids): return False
+        a = m.index(ids[0])
+        return [m.index(i) for i in ids] == list(range(a, a + len(ids)))
+    old34 = json.loads(json.dumps(FIXTURE)); old34["hindi"] = {"ozark": "likely", "succession": "check"}
     s = saved(old34)
     m = s["layout"]["main"]
-    check("ozark" not in s["layout"]["maybe"] and m.index("ozark") == m.index("narcos") + 1 and m.index("lincoln") == m.index("ozark") + 1,
-          "3.5: saved Ozark moves to main after Narcos " + str(m))
-    check("ozark-hindi" in s["migs"] and "ozark" not in s["hindi"], "3.5: move marked done, old Hindi mark cleared")
+    check("ozark" not in s["layout"]["maybe"] and in_order(m, NEW_MID), "3.6: saved 3.4 list gets the new middle " + str(m))
+    check(len(m) == 14 and m[-1] == "hotd" and m[:4] == ["suits", "hoc", "crown", "diplomat"], "3.6: new series are not left at the end " + str(m))
+    check({"ozark-hindi", "order-oct16"} <= set(s["migs"]) and "ozark" not in s["hindi"] and "succession" not in s["hindi"],
+          "3.6: both moves marked done, old Hindi marks on Ozark and Succession cleared")
+
+    old35 = json.loads(json.dumps(FIXTURE)); old35["migs"] = ["ozark-hindi"]
+    old35["layout"]["maybe"].remove("ozark")
+    old35["layout"]["main"] = ["suits", "hoc", "crown", "diplomat", "succession", "narcos", "ozark", "lincoln", "vikings", "moneyheist", "guinness", "hotd"]
+    s = saved(old35)
+    m = s["layout"]["main"]
+    check(in_order(m, NEW_MID) and len(m) == 14, "3.6: saved 3.5 list (Ozark after Narcos) gets the new middle " + str(m))
+
     pg.click("nav#tabs >> text=सूची")
     q = txt("#scr-queue")
     main_part = q.split("छोटा ब्रेक")[0]
-    check("Ozark" in main_part and main_part.index("Narcos") < main_part.index("Ozark") < main_part.index("The Lincoln Lawyer"),
-          "3.5: list shows Ozark between Narcos and The Lincoln Lawyer")
-    pg.click("#scr-queue .qrow >> text=Ozark")
-    d = txt("#scr-detail")
-    check("हिंदी ✓ (आपने देखा)" in d and "हिंदी जाँचें" not in d, "3.5: Ozark detail shows Hindi ✓")
-    pg.screenshot(path=SHOTS + "11-ozark-detail.png", full_page=True)
-    pg.go_back(); pg.wait_for_timeout(100)
+    names = ["The Diplomat", "Queenmaker", "Succession", "Ozark", "Vincenzo", "Narcos", "The Lincoln Lawyer"]
+    check(all(n in main_part for n in names) and [main_part.index(n) for n in names] == sorted(main_part.index(n) for n in names),
+          "3.6: list shows Diplomat, Queenmaker, Succession, Ozark, Vincenzo, Narcos in order")
+    pg.screenshot(path=SHOTS + "11-queue-3.6.png", full_page=True)
+    for name, hindi, where in [("Queenmaker", "हिंदी ✓", "Netflix"), ("Vincenzo", "हिंदी ✓", "Netflix"),
+                               ("Ozark", "हिंदी ✓ (आपने देखा)", "Netflix"), ("Succession", "हिंदी ✓ (आपने देखा)", "JioHotstar")]:
+        pg.click("#scr-queue .qrow >> text=" + name)
+        d = txt("#scr-detail")
+        check(hindi in d and "हिंदी जाँचें" not in d and where in d, "3.6: " + name + " detail shows " + hindi + " on " + where)
+        if name == "Queenmaker": pg.screenshot(path=SHOTS + "12-queenmaker-detail.png", full_page=True)
+        pg.go_back(); pg.wait_for_timeout(100)
 
     moved_back = json.loads(json.dumps(s)); moved_back["layout"]["main"].remove("ozark"); moved_back["layout"]["maybe"].append("ozark")
+    moved_back["layout"]["main"].remove("queenmaker"); moved_back["layout"]["break"].append("queenmaker")
     s = saved(moved_back)
-    check("ozark" in s["layout"]["maybe"] and "ozark" not in s["layout"]["main"], "3.5: a later move by hand stays")
+    check("ozark" in s["layout"]["maybe"] and "ozark" not in s["layout"]["main"] and "queenmaker" in s["layout"]["break"],
+          "3.6: a later move by hand stays")
 
     no_narcos = json.loads(json.dumps(FIXTURE)); no_narcos["layout"]["main"].remove("narcos"); no_narcos["removed"] = ["narcos"]
     m = saved(no_narcos)["layout"]["main"]
-    check(m.index("lincoln") == m.index("ozark") + 1, "3.5: Narcos deleted -> Ozark before The Lincoln Lawyer " + str(m))
+    check(in_order(m, ["diplomat", "queenmaker", "succession", "ozark", "vincenzo", "lincoln"]) and "narcos" not in m,
+          "3.6: Narcos deleted -> Vincenzo before The Lincoln Lawyer " + str(m))
+
+    finished = json.loads(json.dumps(FIXTURE)); finished["done"].append("succession")
+    finished["layout"]["main"].remove("succession"); finished["layout"]["archive"].append("succession")
+    s = saved(finished); m = s["layout"]["main"]
+    check("succession" in s["layout"]["archive"] and "succession" not in m and in_order(m, ["diplomat", "queenmaker", "ozark", "vincenzo", "narcos"]),
+          "3.6: a finished Succession stays in the diary list " + str(m))
 
     pg.evaluate("() => localStorage.clear()"); pg.reload()
     s = st(); m = s["layout"]["main"]
-    check(m.index("ozark") == m.index("narcos") + 1 and "ozark" not in s["layout"]["maybe"], "3.5: fresh install has Ozark after Narcos")
-    check(not errors, "no JS errors after Ozark checks: " + "; ".join(errors))
+    check(in_order(m, NEW_MID) and len(m) == 14 and "ozark" not in s["layout"]["maybe"], "3.6: fresh install has the new order " + str(m))
+    check(not errors, "no JS errors after order checks: " + "; ".join(errors))
 
     # ---- Migration from v1.0 key
     pg.evaluate("() => { localStorage.clear(); localStorage.setItem('abhimanyu-watchlist-done', JSON.stringify(['suits'])); }")

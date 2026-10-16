@@ -306,10 +306,12 @@ const CATALOG = {
   bcs: { name: "Better Call Saul + Breaking Bad", where: "प्लेटफ़ॉर्म जाँचें", hindi: "check", hindiText: "हिंदी सिर्फ़ TV पर आई थी", why: "जिमी टिरियन जैसा है: चालाक, पर दिल वाला। फिर वॉल्टर का दिमाग़ से साम्राज्य।", seasons: [10, 10, 10, 10, 10, 13, 7, 13, 13, 13, 16], labels: ["BCS 1", "BCS 2", "BCS 3", "BCS 4", "BCS 5", "BCS 6", "BB 1", "BB 2", "BB 3", "BB 4", "BB 5"] },
   narcosmx: { name: "Narcos: Mexico", where: "Netflix", hindi: "check", why: "Narcos के बाद उसी कहानी का अगला हिस्सा।", seasons: [10, 10, 10] },
   designated: { name: "Designated Survivor", where: "प्लेटफ़ॉर्म जाँचें", hindi: "check", why: "एक मामूली मंत्री अचानक राष्ट्रपति। अनचाही सत्ता और मूल्य।", seasons: [21, 22, 10] },
-  ozark: { name: "Ozark", where: "Netflix", hindi: "ok", hindiText: "हिंदी ✓ (आपने देखा)", why: "Narcos वाली दुनिया, पैसे की तरफ़ से। एक फ़ाइनेंशियल एडवाइज़र कार्टेल का पैसा सफ़ेद करता है, और मार्टी-वेंडी की जोड़ी The Diplomat जैसी है।", seasons: [10, 10, 10, 14] }
+  ozark: { name: "Ozark", where: "Netflix", hindi: "ok", hindiText: "हिंदी ✓ (आपने देखा)", why: "Billions की कमी यही भरेगी। एक फ़ाइनेंशियल एडवाइज़र कार्टेल का पैसा सफ़ेद करता है; मार्टी-वेंडी साथी भी हैं और प्रतिद्वंद्वी भी, और रूथ उसकी वफ़ादार दाईं बाँह।", seasons: [10, 10, 10, 14] },
+  queenmaker: { name: "Queenmaker", where: "Netflix", hindi: "ok", why: "राजनीति की तिकड़ी के बाद चुनाव का खेल। एक ताक़तवर फ़िक्सर पाला बदलकर एक वकील को मेयर बनाती है, ताकि अपने पुराने मालिक, एक बड़े कारोबारी घराने, को गिरा सके। छोटी कोरियन सीरीज़: कोरियन अंदाज़ यहीं परखिए।", seasons: [11] },
+  vincenzo: { name: "Vincenzo", where: "Netflix", hindi: "ok", why: "जान देने वाला वफ़ादार घेरा: इटली का माफ़िया वकील और इमारत के किरायेदार मिलकर एक बेरहम कॉर्पोरेट समूह से भिड़ते हैं। Ozark और Narcos के बीच कॉमेडी वाली राहत; एपिसोड लंबे हैं।", seasons: [20] }
 };
 const DEFAULT_LAYOUT = {
-  main: ["suits", "hoc", "crown", "diplomat", "succession", "narcos", "ozark", "lincoln", "vikings", "moneyheist", "guinness", "hotd"],
+  main: ["suits", "hoc", "crown", "diplomat", "queenmaker", "succession", "ozark", "vincenzo", "narcos", "lincoln", "vikings", "moneyheist", "guinness", "hotd"],
   break: ["gentlemen"],
   maybe: ["billions", "bcs", "narcosmx", "designated"],
   archive: []
@@ -321,9 +323,9 @@ const CHAR_TYPES = ["धूसर नायक", "सब संभालने �
 const TILE_COLORS = ["#2D4A80", "#4B3A73", "#2C5E58", "#6E4C2C", "#3C5577", "#6E3448", "#55602F"];
 const KEY = "abhimanyu-watchlist-v2";
 const OLD_KEY = "abhimanyu-watchlist-done";
-const VERSION = "3.5";
+const VERSION = "3.6";
 // BUILD goes up by one on every live update; docs/version.json must carry the same number.
-const BUILD = 35;
+const BUILD = 36;
 // Which Android shell is running this page: the starter page sets it; 0 means a plain browser.
 const SHELL = (window.WL_SHELL | 0) || (parseInt(new URLSearchParams(location.search).get("shell"), 10) || 0);
 const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
@@ -331,7 +333,8 @@ const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
 // with the same name (Suits LA, the 1990 House of Cards) is never picked.
 const TV_API = "https://api.tvmaze.com/";
 const TV_IDS = { suits: 172, hoc: 175, crown: 3594, diplomat: 60213, succession: 23470, narcos: 2705, lincoln: 52910, vikings: 29,
-  moneyheist: 27436, guinness: 75496, hotd: 44778, gentlemen: 64992, billions: 3606, bcs: 618, narcosmx: 37787, designated: 8167, ozark: 13417 };
+  moneyheist: 27436, guinness: 75496, hotd: 44778, gentlemen: 64992, billions: 3606, bcs: 618, narcosmx: 37787, designated: 8167, ozark: 13417,
+  queenmaker: 66447, vincenzo: 52656 };
 const TV_BY_NAME = { "peaky blinders": 269, "game of thrones": 82, "breaking bad": 169, "better call saul": 618 };
 // TVmaze words shown in Hindi; anything not listed stays as TVmaze wrote it.
 const GENRE_HI = { Action: "एक्शन", Adventure: "एडवेंचर", Anime: "एनीमे", Children: "बच्चों के लिए", Comedy: "कॉमेडी", Crime: "क्राइम",
@@ -348,6 +351,10 @@ const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "
 const APK_URL = LIVE_BASE + "watchlist.apk";
 // Shown once in the "क्या नया है" card after the update arrives.
 const CHANGES = {
+  36: [
+    "दो नई कोरियन सीरीज़ जुड़ीं, दोनों हिंदी ✓: Queenmaker और Vincenzo।",
+    "मुख्य क्रम का नया हिस्सा: The Diplomat → Queenmaker → Succession → Ozark → Vincenzo → Narcos।"
+  ],
   35: [
     "Ozark अब \"मुख्य क्रम\" में Narcos के ठीक बाद है, क्योंकि उसका हिंदी ऑडियो मिल गया। उस पर अब \"हिंदी ✓\" लिखा है।"
   ],
@@ -441,6 +448,31 @@ function loadState(s) {
       delete s.hindi.ozark;
     }
     s.migs.push("ozark-hindi");
+  }
+  if (!s.migs.includes("order-oct16")) {
+    // 3.6 (16 Oct 2026): he set a new middle for the main order:
+    // The Diplomat → Queenmaker → Succession → Ozark → Vincenzo → Narcos.
+    // Queenmaker and Vincenzo are new, so the loop above has just put them at the end of the main order.
+    // Each of the four moves into place from main, "हिंदी मिले तो देखें" or "छोटा ब्रेक"; a finished, archived or deleted one is left alone.
+    const m = s.layout.main;
+    const place = (id, spots) => {
+      if (s.done.includes(id)) return;
+      const L = ["main", "maybe", "break"].find(x => s.layout[x].includes(id));
+      if (!L) return;
+      s.layout[L].splice(s.layout[L].indexOf(id), 1);
+      for (const [where, ref] of spots) {
+        const at = m.indexOf(ref);
+        if (at >= 0) { m.splice(where === "after" ? at + 1 : at, 0, id); return; }
+      }
+      m.push(id);
+    };
+    place("queenmaker", [["after", "diplomat"], ["before", "succession"], ["after", "crown"], ["after", "hoc"]]);
+    place("succession", [["after", "queenmaker"], ["after", "diplomat"], ["before", "narcos"]]);
+    place("ozark", [["after", "succession"], ["after", "queenmaker"], ["before", "narcos"]]);
+    place("vincenzo", [["after", "ozark"], ["before", "narcos"], ["before", "lincoln"]]);
+    // He saw Succession's Hindi audio himself, so an older "हिंदी जाँचें" mark of his would now be wrong.
+    if (s.hindi.succession && s.hindi.succession !== "ok") delete s.hindi.succession;
+    s.migs.push("order-oct16");
   }
 
   s.seeded2 = true;
