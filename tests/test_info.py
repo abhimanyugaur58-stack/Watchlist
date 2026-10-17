@@ -5,7 +5,7 @@ import sys
 import time
 
 from playwright.sync_api import sync_playwright
-from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze, NO_INTRO
+from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze, NO_INTRO, load_fixture
 
 check = Checker()
 
@@ -29,9 +29,8 @@ with sync_playwright() as p:
     errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
     st = lambda: pg.evaluate("k => JSON.parse(localStorage.getItem(k))", KEY)
-    pg.goto(URL)
-    pg.evaluate("([k, s]) => { localStorage.clear(); localStorage.setItem(k, JSON.stringify(s)); localStorage.setItem('wl-seen-build', '99'); }", [KEY, FIXTURE])
-    pg.goto(URL)
+    # Check-and-retry load (cold-run flake: the app sometimes started empty, so 'peaky' was missing later on; seen again 17 Oct 2026).
+    load_fixture(pg, extra={"wl-seen-build": "99"})
 
     # ---- Add screen: typing a name brings suggestions with posters ----
     pg.click("#tabs .fab")
@@ -181,9 +180,8 @@ with sync_playwright() as p:
     ctx.add_init_script(NO_INTRO)
     FakeTVmaze().attach(ctx)
     pg = ctx.new_page()
-    pg.goto(URL)
-    pg.evaluate("([k, s]) => { localStorage.clear(); localStorage.setItem(k, JSON.stringify(s)); localStorage.setItem('wl-seen-build', '99'); }", [KEY, FIXTURE])
-    pg.goto(URL)
+    # Check-and-retry load (cold-run flake: the app sometimes started empty, so 'peaky' was missing later on; seen again 17 Oct 2026).
+    load_fixture(pg, extra={"wl-seen-build": "99"})
     pg.click("#tabs .tab >> text=सूची")
     check(wait_for(pg, "document.querySelector('#scr-detail [data-info] .facts') !== null"), "tablet: info in the side pane")
     pg.wait_for_timeout(1500)

@@ -308,10 +308,16 @@ const CATALOG = {
   designated: { name: "Designated Survivor", where: "प्लेटफ़ॉर्म जाँचें", hindi: "check", why: "एक मामूली मंत्री अचानक राष्ट्रपति। अनचाही सत्ता और मूल्य।", seasons: [21, 22, 10] },
   ozark: { name: "Ozark", where: "Netflix", hindi: "ok", hindiText: "हिंदी ✓ (आपने देखा)", why: "Billions की कमी यही भरेगी। एक फ़ाइनेंशियल एडवाइज़र कार्टेल का पैसा सफ़ेद करता है; मार्टी-वेंडी साथी भी हैं और प्रतिद्वंद्वी भी, और रूथ उसकी वफ़ादार दाईं बाँह।", seasons: [10, 10, 10, 14] },
   queenmaker: { name: "Queenmaker", where: "Netflix", hindi: "ok", why: "राजनीति की तिकड़ी के बाद चुनाव का खेल। एक ताक़तवर फ़िक्सर पाला बदलकर एक वकील को मेयर बनाती है, ताकि अपने पुराने मालिक, एक बड़े कारोबारी घराने, को गिरा सके। छोटी कोरियन सीरीज़: कोरियन अंदाज़ यहीं परखिए।", seasons: [11] },
-  vincenzo: { name: "Vincenzo", where: "Netflix", hindi: "ok", why: "जान देने वाला वफ़ादार घेरा: इटली का माफ़िया वकील और इमारत के किरायेदार मिलकर एक बेरहम कॉर्पोरेट समूह से भिड़ते हैं। Ozark और Narcos के बीच कॉमेडी वाली राहत; एपिसोड लंबे हैं।", seasons: [20] }
+  vincenzo: { name: "Vincenzo", where: "Netflix", hindi: "ok", why: "जान देने वाला वफ़ादार घेरा: इटली का माफ़िया वकील और इमारत के किरायेदार मिलकर एक बेरहम कॉर्पोरेट समूह से भिड़ते हैं। Ozark और Narcos के बीच कॉमेडी वाली राहत; एपिसोड लंबे हैं।", seasons: [20] },
+  ginny: { name: "Ginny & Georgia", where: "Netflix", hindi: "ok", why: "महिला ही केंद्र में: मुश्किल बचपन से भागी एक जवान माँ अमीर कस्बे में मेयर के दफ़्तर तक पहुँचती है और बच्चों के लिए अपने राज़ छुपाती है। Narcos के बाद हल्के अंदाज़ वाली राहत; आधी कहानी बेटी की स्कूल वाली ज़िंदगी की है।", seasons: [10, 10, 10] },
+  valhalla: { name: "Vikings: Valhalla", where: "Netflix", hindi: "ok", why: "Vikings की दुनिया का अगला अध्याय, क़रीब 100 साल बाद, जब वाइकिंग दौर ख़त्म हो रहा है। बाग़ी योद्धा फ़्रेडिस और दिमाग़ से राजनीति चलाने वाली क्वीन एमा।", seasons: [8, 8, 8] },
+  witcher: { name: "The Witcher", where: "Netflix", hindi: "ok", why: "ठुकराई गई लड़की से जादूगरनी बनी येनेफ़र, जिसने ताक़त के लिए माँ बनने की क्षमता क़ुर्बान की, और सब कुछ खोकर लड़ाका बनी सिरी। चौथे सीज़न में मुख्य अभिनेता बदल गया है।", seasons: [8, 8, 8, 8] },
+  outerbanks: { name: "Outer Banks", where: "Netflix", hindi: "ok", why: "We Were Liars वाला कॉन्सेप्ट: अमीर घरानों के बच्चे बनाम ग़रीब दोस्तों का जान देने वाला घेरा, और ख़ज़ाने की खोज। किशोर एडवेंचर; कहानी 5 सीज़न में पूरी।", seasons: [10, 10, 10, 10, 10] },
+  rop: { name: "The Rings of Power", where: "Prime Video", hindi: "ok", why: "गैलाड्रियल केंद्र में, और सबसे बड़ा पहलू उसका धोखा खाना। सात पहलुओं पर नई पाँच में सबसे कम अंक और कहानी अभी अधूरी; सूची लंबी लगे तो छोड़ सकते हैं।", seasons: [8, 8, 8] }
 };
 const DEFAULT_LAYOUT = {
-  main: ["suits", "hoc", "crown", "diplomat", "queenmaker", "succession", "ozark", "vincenzo", "narcos", "lincoln", "vikings", "moneyheist", "guinness", "hotd"],
+  main: ["suits", "hoc", "crown", "diplomat", "queenmaker", "succession", "ozark", "vincenzo", "narcos", "ginny", "lincoln", "vikings", "valhalla",
+    "moneyheist", "witcher", "guinness", "hotd", "outerbanks", "rop"],
   break: ["gentlemen"],
   maybe: ["billions", "bcs", "narcosmx", "designated"],
   archive: []
@@ -323,9 +329,9 @@ const CHAR_TYPES = ["धूसर नायक", "सब संभालने �
 const TILE_COLORS = ["#2D4A80", "#4B3A73", "#2C5E58", "#6E4C2C", "#3C5577", "#6E3448", "#55602F"];
 const KEY = "abhimanyu-watchlist-v2";
 const OLD_KEY = "abhimanyu-watchlist-done";
-const VERSION = "3.6";
+const VERSION = "3.7";
 // BUILD goes up by one on every live update; docs/version.json must carry the same number.
-const BUILD = 36;
+const BUILD = 37;
 // Which Android shell is running this page: the starter page sets it; 0 means a plain browser.
 const SHELL = (window.WL_SHELL | 0) || (parseInt(new URLSearchParams(location.search).get("shell"), 10) || 0);
 const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
@@ -334,7 +340,7 @@ const LIVE_BASE = "https://abhimanyugaur58-stack.github.io/Watchlist/";
 const TV_API = "https://api.tvmaze.com/";
 const TV_IDS = { suits: 172, hoc: 175, crown: 3594, diplomat: 60213, succession: 23470, narcos: 2705, lincoln: 52910, vikings: 29,
   moneyheist: 27436, guinness: 75496, hotd: 44778, gentlemen: 64992, billions: 3606, bcs: 618, narcosmx: 37787, designated: 8167, ozark: 13417,
-  queenmaker: 66447, vincenzo: 52656 };
+  queenmaker: 66447, vincenzo: 52656, ginny: 47549, valhalla: 45121, witcher: 28276, outerbanks: 42062, rop: 33352 };
 const TV_BY_NAME = { "peaky blinders": 269, "game of thrones": 82, "breaking bad": 169, "better call saul": 618 };
 // TVmaze words shown in Hindi; anything not listed stays as TVmaze wrote it.
 const GENRE_HI = { Action: "एक्शन", Adventure: "एडवेंचर", Anime: "एनीमे", Children: "बच्चों के लिए", Comedy: "कॉमेडी", Crime: "क्राइम",
@@ -351,6 +357,10 @@ const MONTHS_HI = ["जनवरी", "फ़रवरी", "मार्च", "
 const APK_URL = LIVE_BASE + "watchlist.apk";
 // Shown once in the "क्या नया है" card after the update arrives.
 const CHANGES = {
+  37: [
+    "पाँच नई सीरीज़ जुड़ीं, सब हिंदी ✓: Ginny & Georgia, Vikings: Valhalla, The Witcher, Outer Banks और The Rings of Power।",
+    "मुख्य क्रम में जगह: Narcos के बाद Ginny & Georgia, Vikings के बाद Valhalla, Money Heist के बाद The Witcher, House of the Dragon के बाद Outer Banks, और उसके बाद The Rings of Power।"
+  ],
   36: [
     "दो नई कोरियन सीरीज़ जुड़ीं, दोनों हिंदी ✓: Queenmaker और Vincenzo।",
     "मुख्य क्रम का नया हिस्सा: The Diplomat → Queenmaker → Succession → Ozark → Vincenzo → Narcos।"
@@ -473,6 +483,40 @@ function loadState(s) {
     // He saw Succession's Hindi audio himself, so an older "हिंदी जाँचें" mark of his would now be wrong.
     if (s.hindi.succession && s.hindi.succession !== "ok") delete s.hindi.succession;
     s.migs.push("order-oct16");
+  }
+  if (!s.migs.includes("add-five-oct17")) {
+    // 3.7 (17 Oct 2026): five series with Hindi audio join the main order where he chose:
+    // Narcos → Ginny & Georgia, Vikings → Vikings: Valhalla, Money Heist → The Witcher, House of the Dragon → Outer Banks,
+    // and The Rings of Power right after Outer Banks (the end of the built-in order; series he added himself stay where they are).
+    // The loop above has just put all five at the end of the main order.
+    const m = s.layout.main;
+    const norm = x => String(x).toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "");
+    const own = new Set(Object.values(s.custom).map(c => norm(c.name)));
+    const names = { ginny: ["Ginny & Georgia"], valhalla: ["Vikings: Valhalla"], witcher: ["The Witcher", "Witcher"], outerbanks: ["Outer Banks"],
+      rop: ["The Rings of Power", "Rings of Power", "The Lord of the Rings: The Rings of Power"] };
+    const place = (id, spots) => {
+      // He already keeps this series himself: keep his copy (with his progress) and leave the built-in one out.
+      if (names[id].some(n => own.has(norm(n)))) {
+        for (const L of LISTS) { const i = s.layout[L].indexOf(id); if (i >= 0) s.layout[L].splice(i, 1); }
+        if (!s.removed.includes(id)) s.removed.push(id);
+        return;
+      }
+      if (s.done.includes(id)) return;
+      const L = ["main", "maybe", "break"].find(x => s.layout[x].includes(id));
+      if (!L) return;
+      s.layout[L].splice(s.layout[L].indexOf(id), 1);
+      for (const [where, ref] of spots) {
+        const at = m.indexOf(ref);
+        if (at >= 0) { m.splice(where === "after" ? at + 1 : at, 0, id); return; }
+      }
+      m.push(id);
+    };
+    place("ginny", [["after", "narcos"], ["before", "lincoln"], ["before", "vikings"]]);
+    place("valhalla", [["after", "vikings"], ["before", "moneyheist"]]);
+    place("witcher", [["after", "moneyheist"], ["before", "guinness"], ["before", "hotd"]]);
+    place("outerbanks", [["after", "hotd"]]);
+    place("rop", [["after", "outerbanks"], ["after", "hotd"]]);
+    s.migs.push("add-five-oct17");
   }
 
   s.seeded2 = true;

@@ -6,7 +6,7 @@ import time
 from urllib.parse import unquote_plus
 
 from playwright.sync_api import sync_playwright
-from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze, NO_INTRO
+from common import APP_URL as URL, OUT, KEY, FIXTURE, Checker, FakeTVmaze, NO_INTRO, load_fixture
 
 check = Checker()
 
@@ -33,9 +33,9 @@ with sync_playwright() as p:
     ls = lambda k: pg.evaluate("k => localStorage.getItem(k)", k)
 
     # Fresh device with the saved list: posters arrive by themselves.
-    pg.goto(URL)
-    pg.evaluate("([k, s]) => { localStorage.clear(); localStorage.setItem(k, JSON.stringify(s)); }", [KEY, FIXTURE])
-    pg.goto(URL)
+    # load_fixture checks the app really read the list (cold-run flake, 16-17 Oct 2026: the app sometimes started empty,
+    # so Peaky Blinders and GoT were missing and never got posters).
+    load_fixture(pg)
     # Typing while posters arrive must not lose the text.
     pg.click("#tabs .fab")
     pg.fill("#add-name", "आधा लिखा नाम")
@@ -44,7 +44,11 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1500)
     check(pg.input_value("#add-name") == "आधा लिखा नाम", "text being typed survives posters arriving")
     pg.go_back()
-    wait_for(pg, "localStorage.getItem('wl-poster:82') !== null", 30000)
+    # Posters arrive one by one, about 0.35 s apart, in list order; his own series sit last (the diary list), behind 24 built-in ones
+    # since 3.7. Wait for both.
+    if not wait_for(pg, "localStorage.getItem('wl-poster:82') !== null && localStorage.getItem('wl-poster:269') !== null", 60000):
+        print("DEBUG posters stored:", pg.evaluate("Object.keys(localStorage).filter(k => k.startsWith('wl-poster:')).length"),
+              "| diary list:", pg.evaluate("k => JSON.stringify(JSON.parse(localStorage.getItem(k)).layout.archive)", KEY))
     check(ls("wl-poster:269") is not None and ls("wl-poster:82") is not None, "own series Peaky Blinders and GoT got posters by name")
     check(pg.locator("#scr-now .card[aria-label='अभी देख रहे हैं'] img.tile.poster").count() == 1, "Now card shows the poster")
     check(pg.locator("#scr-now .upnext img.tile.sm").count() == 2, "up-next rows show small posters")
